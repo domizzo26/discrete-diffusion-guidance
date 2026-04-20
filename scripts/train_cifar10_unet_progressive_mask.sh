@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=train_cifar10
-#SBATCH --account=3261535
+#SBATCH --account=IscrC_UNMASKED
 #SBATCH --partition=boost_usr_prod
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=16gb
@@ -10,7 +10,7 @@
 #SBATCH --output=out/%x_%j.out
 #SBATCH --error=err/%x_%j.err
 #SBATCH --mail-type=all
-#SBATCH --mail-user=3261535+hpc@phd.unibocconi.it
+#SBATCH --mail-user=domitilla.izzo@studbocconi.it
 
 # NOTE: Need to set the (local) dataset path for downloaded cifar-10 data
 # For subset training, point to the preprocessed subset directory instead
@@ -77,6 +77,9 @@ fi
 
 # Optional: Set BATCH_SIZE for training (default: 250)
 BATCH_SIZE=${BATCH_SIZE:-250}
+
+# Optional: Set PROGRESSIVE_MASK_PROB for training (default: 0.0)
+PROGRESSIVE_MASK_PROB=${PROGRESSIVE_MASK_PROB:-0.0}
 
 # Optional: Set MAX_STEPS to train for more/fewer steps (default: 300000)
 MAX_STEPS=${MAX_STEPS:-300000}
@@ -169,6 +172,7 @@ srun python -u -m main \
   eval.num_f_mem_samples=${NUM_F_MEM_SAMPLES} \
   eval.mem_threshold=${MEM_THRESHOLD} \
   training.guidance.cond_dropout=0.1 \
+  training.progressive_mask_prob=${PROGRESSIVE_MASK_PROB} \
   eval.generate_samples=True \
   sampling.num_sample_batches=1 \
   sampling.batch_size=2 \
@@ -176,4 +180,3 @@ srun python -u -m main \
   sampling.steps=128 \
   wandb.name="cifar10_${RUN_NAME}" \
   hydra.run.dir="${PWD}/outputs/cifar10/${RUN_NAME}"
-

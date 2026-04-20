@@ -90,6 +90,9 @@ class Diffusion(L.LightningModule):
 
     self.tokenizer = tokenizer
     self.vocab_size = tokenizer.vocab_size
+    
+    # Default to 0.0 so it doesn't break old configs
+    self.progressive_mask_prob = getattr(config.training, 'progressive_mask_prob', 0.0)
 
     self.antithetic_sampling = config.training.antithetic_sampling
     self.importance_sampling = config.training.importance_sampling
@@ -479,8 +482,24 @@ class Diffusion(L.LightningModule):
       move_chance: float torch.Tensor with shape
         (batch_size, 1).
     """
-    move_indices = torch.rand(
-      *x.shape, device=x.device) < move_chance
+    batch_size, seq_len = x.shape
+    is_progressive = torch.rand(batch_size, device=x.device) < 0.4
+    move_indices = torch.zeros_like(x, dtype=torch.bool, device=x.device)
+    
+    for i in range(batch_size):
+        if self.config.is_vision and is_progressive[i]:
+            # --- PROGRESSIVE MASKING (40%) ---
+            # move_chance is the % of the image that SHOULD be masked.
+            # Example: if move_chance is 0.7, we mask the LAST 70% of pixels.
+            
+            num_masked_tokens = int(seq_len * move_chance[i].item())
+            cutoff_index = seq_len - num_masked_tokens
+            
+            # Mask everything from the cutoff to the end
+            move_indices[i, cutoff_index:] = True
+        else:
+            # --- RANDOM MASKING (60%) ---
+            move_indices[i] = torch.rand(seq_len, device=x.device) < move_chance[i]
     if self.diffusion == 'absorbing_state':
       return torch.where(move_indices, self.mask_index, x)
     if self.diffusion == 'uniform':
