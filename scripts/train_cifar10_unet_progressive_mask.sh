@@ -1,9 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=train_cifar10
+#SBATCH --job-name=mdlm_hybrid_cifar10
 #SBATCH --account=IscrC_UNMASKED
 #SBATCH --partition=boost_usr_prod
+#SBATCH --ntasks-per-node=4
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=16gb
+#SBATCH --mem=64gb
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:4
