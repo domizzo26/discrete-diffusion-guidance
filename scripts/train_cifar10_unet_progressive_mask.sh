@@ -13,6 +13,7 @@
 #SBATCH --mail-type=all
 #SBATCH --mail-user=domitilla.izzo@studbocconi.it
 
+
 # NOTE: Need to set the (local) dataset path for downloaded cifar-10 data
 # For subset training, point to the preprocessed subset directory instead
 DATASET_PATH=${DATASET_PATH:-${HOME}/discrete-diffusion-guidance/data/cifar10}
@@ -50,6 +51,9 @@ fi
 source setup_env.sh
 export NCCL_P2P_LEVEL=NVL
 export HYDRA_FULL_ERROR=1
+# Weights & Biases Config
+export WANDB_API_KEY=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
+export WANDB_MODE=offline
 
 # Expecting:
 #  - MODEL (mdlm, udlm)
