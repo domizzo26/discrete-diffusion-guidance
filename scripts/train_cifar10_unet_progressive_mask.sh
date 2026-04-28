@@ -48,11 +48,11 @@ if [[ -n "${REFERENCE_DIR}" && "${REFERENCE_DIR}" != /* ]]; then
   REFERENCE_DIR="${REPO_ROOT}/${REFERENCE_DIR}"
 fi
 
-source $WORK/discrete-diffusion-guidance/setup_env.sh
+source $SLURM_SUBMIT_DIR/setup_env.sh
 export NCCL_P2P_LEVEL=NVL
 export HYDRA_FULL_ERROR=1
 # Weights & Biases Config
-export WANDB_API_KEY=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
+export WANDB_API_KEY=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
 export WANDB_MODE=offline
 
 # Expecting:
