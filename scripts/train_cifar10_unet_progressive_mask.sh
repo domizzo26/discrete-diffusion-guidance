@@ -48,7 +48,7 @@ if [[ -n "${REFERENCE_DIR}" && "${REFERENCE_DIR}" != /* ]]; then
   REFERENCE_DIR="${REPO_ROOT}/${REFERENCE_DIR}"
 fi
 
-source setup_env.sh
+source $WORK/discrete-diffusion-guidance/setup_env.sh
 export NCCL_P2P_LEVEL=NVL
 export HYDRA_FULL_ERROR=1
 # Weights & Biases Config
