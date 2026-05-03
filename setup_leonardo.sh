@@ -1,13 +1,12 @@
 #!/bin/bash
 
-# 1. Carica il modulo conda (fondamentale su Leonardo)
+# 1. Load Anaconda module 
 module load anaconda3
 
-# 2. Inizializza conda in modo sicuro
-# Questo percorso è lo standard su Leonardo per inizializzare il comando 'conda'
-source /leonardo/common/system/opt/anaconda/install/etc/profile.d/conda.sh
+# 2. Initialize conda for the current shell session
+source source "$(dirname "$(which conda)")/../etc/profile.d/conda.sh"
 
-# 3. Attiva il tuo ambiente 'discdiff'
+# 3. Activate the 'discdiff' conda environment
 conda activate discdiff
 
 # Setup HF cache
