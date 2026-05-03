@@ -1,20 +1,15 @@
 #!/bin/bash
-
-# 1. Load the necessary system modules (no Anaconda)
+echo "Starting setup..."
 module purge
 module load cuda/12.4
 module load gcc/12
+echo "Modules loaded."
 
-# 2. Activate your virtual environment (the path where you created it)
-# Make sure to use the absolute path to your venv
+# Update this path to the REAL path you verified with 'ls'
 source /leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance/discdiff/bin/activate
+echo "Environment activated."
 
-# Setup HF cache
 export HF_HOME="${PWD}/.hf_cache"
-echo "HuggingFace cache set to '${HF_HOME}'."
-
-# Add root directory to PYTHONPATH
 export PYTHONPATH="${PWD}:${PWD}/guidance_eval:${HF_HOME}/modules"
-
-# Set the temp directory for pip/builds
 export TMPDIR=$PWD/tmp_pip
+echo "Setup complete."
