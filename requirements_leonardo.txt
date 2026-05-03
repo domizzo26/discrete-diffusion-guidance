@@ -1,3 +1,11 @@
+cuda-nvcc=12.4.99
+ipykernel=6.29.5
+ipython=8.15.0
+ipywidgets=8.1.2
+pip=23.3.1
+python=3.9.20
+pytorch=2.2.2
+mkl < 2024
 biopython==1.84
 causal-conv1d==1.4.0
 datasets==2.18.0
