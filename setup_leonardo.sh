@@ -4,7 +4,7 @@
 module load anaconda3
 
 # 2. Initialize conda for the current shell session
-source "$(dirname "$(which conda)")/../etc/profile.d/conda.sh"
+eval "$(conda shell.bash hook)"
 
 # 3. Activate the 'discdiff' conda environment
 conda activate discdiff
