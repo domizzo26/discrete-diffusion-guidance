@@ -7,7 +7,7 @@ module load gcc/12
 
 # 2. Activate your virtual environment (the path where you created it)
 # Make sure to use the absolute path to your venv
-source /leonardo_work/YOUR_PROJECT_FOLDER/discrete-diffusion-guidance/discdiff/bin/activate
+source /leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance/discdiff/bin/activate
 
 # Setup HF cache
 export HF_HOME="${PWD}/.hf_cache"
