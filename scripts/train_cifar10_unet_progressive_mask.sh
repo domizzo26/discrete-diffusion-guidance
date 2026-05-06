@@ -17,6 +17,7 @@
 # NOTE: Need to set the (local) dataset path for downloaded cifar-10 data
 # For subset training, point to the preprocessed subset directory instead
 DATASET_PATH=${DATASET_PATH:-${HOME}/discrete-diffusion-guidance/data/cifar10}
+PROJECT_ROOT="/leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance"
 
 <<comment
 #  Usage:
@@ -157,7 +158,7 @@ check_cifar10_dataset_path "${DATASET_PATH}" || exit 1
 
 # To enable preemption re-loading, set `hydra.run.dir`
 
-export PYTHONPATH=$PYTHONPATH:.
+cd "$PROJECT_ROOT" || { echo "Failed to change directory to $PROJECT_ROOT"; exit 1; }
 echo "Current directory: $(pwd)"
 ls -F
 
