@@ -163,14 +163,14 @@ echo "Current directory: $(pwd)"
 echo "Using python from: $(which python)"
 ls -F
 
-srun python -u main.py \
+srun python -u main.py --config-dir=configs \
+  data=cifar10 \
   is_vision=True \
   diffusion=${DIFFUSION} \
   parameterization=${PARAMETERIZATION} \
   T=${T} \
   time_conditioning=${time_conditioning} \
   zero_recon_loss=${ZERO_RECON_LOSS} \
-  data=cifar10 \
   data.train=${DATASET_PATH} \
   data.valid=${DATASET_PATH} \
   loader.global_batch_size=${BATCH_SIZE} \
