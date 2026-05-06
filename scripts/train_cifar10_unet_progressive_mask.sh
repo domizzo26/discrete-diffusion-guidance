@@ -29,8 +29,11 @@ sbatch \
 comment
 
 # Setup environment
-cd ../ || exit  # Go to the root directory of the repo
-REPO_ROOT=$(pwd)
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+cd "$REPO_ROOT" || exit
+#cd ../ || exit  # Go to the root directory of the repo
+#REPO_ROOT=$(pwd)
 
 # Convert DATASET_PATH to absolute path relative to repo root if not already absolute
 if [[ "${DATASET_PATH}" != /* ]]; then
@@ -149,6 +152,8 @@ echo "Checkpoint every n steps: ${CHECKPOINT_EVERY_N_STEPS}"
 echo "=============================================="
 
 check_cifar10_dataset_path "${DATASET_PATH}" || exit 1
+
+#cd /leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance/
 
 # To enable preemption re-loading, set `hydra.run.dir`
 srun python -u -m main \
