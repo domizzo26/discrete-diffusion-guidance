@@ -162,7 +162,7 @@ cd "$PROJECT_ROOT" || { echo "Failed to change directory to $PROJECT_ROOT"; exit
 echo "Current directory: $(pwd)"
 ls -F
 
-srun python -u main \
+srun python -u main.py \
   is_vision=True \
   diffusion=${DIFFUSION} \
   parameterization=${PARAMETERIZATION} \
