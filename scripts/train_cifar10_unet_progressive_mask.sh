@@ -160,6 +160,7 @@ check_cifar10_dataset_path "${DATASET_PATH}" || exit 1
 
 cd "$PROJECT_ROOT" || { echo "Failed to change directory to $PROJECT_ROOT"; exit 1; }
 echo "Current directory: $(pwd)"
+echo "Using python from: $(which python)"
 ls -F
 
 srun python -u main.py \
