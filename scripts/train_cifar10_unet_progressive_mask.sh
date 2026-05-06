@@ -189,7 +189,7 @@ srun python -u main.py \
   eval.num_f_mem_samples=${NUM_F_MEM_SAMPLES} \
   eval.mem_threshold=${MEM_THRESHOLD} \
   training.guidance.cond_dropout=0.1 \
-  training.progressive_mask_prob=${PROGRESSIVE_MASK_PROB} \
+  +training.progressive_mask_prob=${PROGRESSIVE_MASK_PROB} \
   eval.generate_samples=True \
   sampling.num_sample_batches=1 \
   sampling.batch_size=2 \
