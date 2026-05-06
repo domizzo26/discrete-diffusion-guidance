@@ -156,7 +156,12 @@ check_cifar10_dataset_path "${DATASET_PATH}" || exit 1
 #cd /leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance/
 
 # To enable preemption re-loading, set `hydra.run.dir`
-srun python -u -m main \
+
+export PYTHONPATH=$PYTHONPATH:.
+echo "Current directory: $(pwd)"
+ls -F
+
+srun python -u main \
   is_vision=True \
   diffusion=${DIFFUSION} \
   parameterization=${PARAMETERIZATION} \
