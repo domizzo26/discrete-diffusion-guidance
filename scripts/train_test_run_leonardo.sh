@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=mdlm_hybrid_cifar10
 #SBATCH --account=IscrC_UNMASKED
-#SBATCH --time=00:30:00
+#SBATCH --time=01:00:00
 #SBATCH --partition=boost_usr_prod
 #SBATCH --ntasks-per-node=4
 #SBATCH --cpus-per-task=8
@@ -184,7 +184,7 @@ srun python -u main.py --config-dir=configs \
   optim.lr=2e-4 \
   lr_scheduler=constant_warmup \
   lr_scheduler.num_warmup_steps=100 \
-  callbacks.checkpoint_every_n_steps.every_n_train_steps=${CHECKPOINT_EVERY_N_STEPS} \
+  callbacks.checkpoint_every_n_steps.every_n_train_steps=250 \
   trainer.max_steps=500 \
   trainer.val_check_interval=250 \
   ++trainer.limit_val_batches=2 \
