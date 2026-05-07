@@ -85,7 +85,7 @@ else
 fi
 
 # Optional: Set BATCH_SIZE for training (default: 250)
-BATCH_SIZE=${BATCH_SIZE:-250}
+BATCH_SIZE=${BATCH_SIZE:-256}
 
 # Optional: Set PROGRESSIVE_MASK_PROB for training (default: 0.0)
 PROGRESSIVE_MASK_PROB=${PROGRESSIVE_MASK_PROB:-0.0}
