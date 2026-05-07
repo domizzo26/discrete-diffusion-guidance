@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=mdlm_hybrid_cifar10
 #SBATCH --account=IscrC_UNMASKED
-#SBATCH --time=08:00:00
+#SBATCH --time=01:00:00
 #SBATCH --partition=boost_usr_prod
 #SBATCH --ntasks-per-node=4
 #SBATCH --cpus-per-task=8
