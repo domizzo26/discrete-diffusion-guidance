@@ -53,7 +53,9 @@ if [[ -n "${REFERENCE_DIR}" && "${REFERENCE_DIR}" != /* ]]; then
 fi
 
 source $SLURM_SUBMIT_DIR/setup_leonardo.sh
-export TRANSFORMERS_CACHE=$HOME/.cache/huggingface
+mkdir -p /leonardo_work/IscrC_UNMASKED/.cache
+export HF_HOME="/leonardo_work/IscrC_UNMASKED/.cache"
+export TRANSFORMERS_CACHE="/leonardo_work/IscrC_UNMASKED/.cache/huggingface"
 export NCCL_P2P_LEVEL=NVL
 export HYDRA_FULL_ERROR=1
 # Weights & Biases Config
