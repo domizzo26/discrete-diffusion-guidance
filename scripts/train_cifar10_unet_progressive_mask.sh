@@ -5,7 +5,7 @@
 #SBATCH --ntasks-per-node=4
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64gb
-#SBATCH --ntasks=1
+#SBATCH --ntasks=4
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:4
 #SBATCH --output=out/%x_%j.out
@@ -53,6 +53,7 @@ if [[ -n "${REFERENCE_DIR}" && "${REFERENCE_DIR}" != /* ]]; then
 fi
 
 source $SLURM_SUBMIT_DIR/setup_leonardo.sh
+export TRANSFORMERS_CACHE=$HOME/.cache/huggingface
 export NCCL_P2P_LEVEL=NVL
 export HYDRA_FULL_ERROR=1
 # Weights & Biases Config
