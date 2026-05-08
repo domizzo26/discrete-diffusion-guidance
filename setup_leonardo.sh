@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "Starting setup..."
 module purge
-module load cuda/12.4
+module load cuda/12.2
 module load gcc/12
 echo "Modules loaded."
 
