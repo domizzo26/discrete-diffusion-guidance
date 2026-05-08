@@ -3,12 +3,12 @@
 #SBATCH --account=IscrC_UNMASKED
 #SBATCH --time=02:00:00
 #SBATCH --partition=boost_usr_prod
-#SBATCH --ntasks-per-node=4
+#SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64gb
-#SBATCH --ntasks=4
+#SBATCH --ntasks=1
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:1
 #SBATCH --output=out/%x_%j.out
 #SBATCH --error=err/%x_%j.err
 #SBATCH --mail-type=all
