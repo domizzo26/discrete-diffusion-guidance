@@ -206,4 +206,4 @@ srun python -u main.py --config-dir=configs \
   sampling.use_cache=${sampling_use_cache} \
   sampling.steps=20 \
   wandb.name="test_sanity_check" \
-  hydra.run.dir="${PWD}/outputs/cifar10/test_sanity_check"
+  hydra.run.dir="${PROJECT_ROOT}/runs/test_sanity_check" \
