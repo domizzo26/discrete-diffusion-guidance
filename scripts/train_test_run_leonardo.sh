@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=mdlm_hybrid_cifar10
 #SBATCH --account=IscrC_UNMASKED
-#SBATCH --time=01:00:00
+#SBATCH --time=02:00:00
 #SBATCH --partition=boost_usr_prod
 #SBATCH --ntasks-per-node=4
 #SBATCH --cpus-per-task=8
@@ -186,7 +186,7 @@ srun python -u main.py --config-dir=configs \
   lr_scheduler.num_warmup_steps=100 \
   callbacks.checkpoint_every_n_steps.every_n_train_steps=250 \
   trainer.max_steps=500 \
-  trainer.val_check_interval=250 \
+  trainer.val_check_interval=2 \
   ++trainer.limit_val_batches=1 \
   +trainer.check_val_every_n_epoch=null \
   ++trainer.strategy.ddp_find_unused_parameters=False \
@@ -201,6 +201,6 @@ srun python -u main.py --config-dir=configs \
   sampling.num_sample_batches=1 \
   sampling.batch_size=4 \
   sampling.use_cache=${sampling_use_cache} \
-  sampling.steps=100 \
+  sampling.steps=50 \
   wandb.name="test_sanity_check" \
   hydra.run.dir="${PWD}/outputs/cifar10/test_sanity_check"
