@@ -17,8 +17,8 @@
 
 # NOTE: Need to set the (local) dataset path for downloaded cifar-10 data
 # For subset training, point to the preprocessed subset directory instead
-DATASET_PATH=${DATASET_PATH:-${HOME}/discrete-diffusion-guidance/data/cifar10}
 PROJECT_ROOT="/leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance"
+DATASET_PATH=${DATASET_PATH:-${PROJECT_ROOT}/data/cifar10}
 
 <<comment
 #  Usage:
