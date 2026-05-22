@@ -19,6 +19,8 @@
 # For subset training, point to the preprocessed subset directory instead
 PROJECT_ROOT="/leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance"
 DATASET_PATH=${DATASET_PATH:-${PROJECT_ROOT}/data/cifar10}
+MODEL=${MODEL:-mdlm}
+RUN_NAME=${RUN_NAME:-test_single_gpu}
 
 <<comment
 #  Usage:
@@ -106,8 +108,7 @@ VAL_CHECK_INTERVAL=${VAL_CHECK_INTERVAL:-10000}
 COMPUTE_F_MEM=${COMPUTE_F_MEM:-false}
 NUM_F_MEM_SAMPLES=${NUM_F_MEM_SAMPLES:-100}
 MEM_THRESHOLD=${MEM_THRESHOLD:-0.333}
-MODEL=${MODEL:-mdlm}
-RUN_NAME=${RUN_NAME:-test_single_gpu}
+
 
 check_cifar10_dataset_path() {
   local dataset_root="$1"
