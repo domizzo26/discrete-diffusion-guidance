@@ -53,7 +53,7 @@ if [[ -n "${REFERENCE_DIR}" && "${REFERENCE_DIR}" != /* ]]; then
   REFERENCE_DIR="${REPO_ROOT}/${REFERENCE_DIR}"
 fi
 
-source $SLURM_SUBMIT_DIR/setup_leonardo.sh
+source "${PROJECT_ROOT}/setup_leonardo.sh"
 mkdir -p /leonardo_work/IscrC_UNMASKED/.cache
 export HF_HOME="/leonardo_work/IscrC_UNMASKED/.cache"
 export TRANSFORMERS_CACHE="/leonardo_work/IscrC_UNMASKED/.cache/huggingface"
