@@ -59,8 +59,7 @@ export HF_HOME="/leonardo_work/IscrC_UNMASKED/.cache"
 export TRANSFORMERS_CACHE="/leonardo_work/IscrC_UNMASKED/.cache/huggingface"
 export NCCL_P2P_LEVEL=NVL
 export HYDRA_FULL_ERROR=1
-# Weights & Biases Config
-export WANDB_API_KEY=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
+# Weights & Biases Config - Must be offline on compute nodes
 export WANDB_MODE=offline
 
 # Expecting:
