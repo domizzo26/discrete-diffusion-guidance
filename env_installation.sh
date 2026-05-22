@@ -1,10 +1,13 @@
 #!/bin/bash
+# Setup Proxies for Internet
+export http_proxy=http://proxy-u.cineca.it:3128
+export https_proxy=http://proxy-u.cineca.it:3128
 
-# 1. Load necessary system modules
+# Load necessary system modules
 module purge
 module load cuda/12.2 gcc/12 python/3.11
 
-# 2. Setup paths
+# pip install mkl==2023.2.0Setup paths
 export VENV_PATH="$WORK/discrete-diffusion-guidance/discdiff"
 export TMPDIR="$PWD/tmp_pip"
 mkdir -p $TMPDIR

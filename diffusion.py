@@ -483,23 +483,35 @@ class Diffusion(L.LightningModule):
         (batch_size, 1).
     """
     batch_size, seq_len = x.shape
-    is_progressive = torch.rand(batch_size, device=x.device) < 0.4
+    is_progressive = torch.rand(batch_size, device=x.device) < self.progressive_mask_prob
     move_indices = torch.zeros_like(x, dtype=torch.bool, device=x.device)
     
     for i in range(batch_size):
+        m_chance = move_chance[i].item()
         if self.config.is_vision and is_progressive[i]:
-            # --- PROGRESSIVE MASKING (40%) ---
-            # move_chance is the % of the image that SHOULD be masked.
-            # Example: if move_chance is 0.7, we mask the LAST 70% of pixels.
-            
-            num_masked_tokens = int(seq_len * move_chance[i].item())
-            cutoff_index = seq_len - num_masked_tokens
-            
-            # Mask everything from the cutoff to the end
-            move_indices[i, cutoff_index:] = True
+            num_channels = 3 # RGB
+            h = w = int(math.sqrt(seq_len // num_channels))
+            m_view = move_indices[i].view(num_channels, h, w)
+
+            if is_progressive[i]:
+                # --- BLOCK MASKING (Progressive) ---
+                # Mask entire rows from either the top or the bottom
+                num_rows_to_mask = int(h * m_chance)
+                if num_rows_to_mask > 0:
+                    # 50/50 chance to mask from top or bottom
+                    if torch.rand((), device=x.device) < 0.5:
+                        m_view[:, h - num_rows_to_mask:, :] = True
+                    else:
+                        m_view[:, :num_rows_to_mask, :] = True
+            else:
+                # --- RANDOM SPATIAL MASKING ---
+                # Mask pixels randomly, but mask the whole pixel (all channels)
+                spatial_mask = torch.rand(h, w, device=x.device) < m_chance
+                m_view[:] = spatial_mask
         else:
-            # --- RANDOM MASKING (60%) ---
-            move_indices[i] = torch.rand(seq_len, device=x.device) < move_chance[i]
+            # --- RANDOM TOKEN MASKING (Text/Non-vision) ---
+            move_indices[i] = torch.rand(seq_len, device=x.device) < m_chance
+
     if self.diffusion == 'absorbing_state':
       return torch.where(move_indices, self.mask_index, x)
     if self.diffusion == 'uniform':
