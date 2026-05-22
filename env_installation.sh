@@ -17,7 +17,8 @@ python3 -m venv $VENV_PATH
 source $VENV_PATH/bin/activate
 
 # 4. Core dependencies
-pip install --upgrade pip setuptools wheel
+pip install --upgrade pip wheel
+pip install setuptools==69.5.1
 pip install torch==2.2.2 torchvision==0.17.2 --index-url https://download.pytorch.org/whl/cu121
 pip install mkl==2023.2.0 causal-conv1d==1.4.0
 

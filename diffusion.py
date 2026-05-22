@@ -835,18 +835,21 @@ class Diffusion(L.LightningModule):
     self.load_ema_params()
     assert self.valid_metrics.nll.mean_value == 0
     assert self.valid_metrics.nll.weight == 0
+    if self.trainer.global_rank == 0:
+        print(f"\n[RANK 0] Validation epoch {self.current_epoch} started...")
 
   def on_validation_epoch_end(self):
     self._restore_non_ema_params()
     if (not self.trainer.sanity_checking
         and self.config.eval.generate_samples
         and self.trainer.global_rank == 0):
-      self.config.sampling.batch_size = 1
+      print(f"[RANK 0] Generating validation samples at step {self.global_step}...")
+      original_sampling_batch_size = self.config.sampling.batch_size
+      self.config.sampling.batch_size = 1 # Generate one at a time to save VRAM
       if self.config.is_vision:
         samples = []
         if self.config.training.guidance is not None:
           # Generate one image per class (up to 10 images)
-
           guidance = {
             'method': 'cfg', 'condition': 0, 'gamma': 1.0}
           omegaconf.OmegaConf.update(
@@ -861,11 +864,14 @@ class Diffusion(L.LightningModule):
             samples.append(self.sample())
         image_samples = self.tokenizer.batch_decode(
           torch.concat(samples, dim=0))
-        if hasattr(self.trainer.logger, 'log_image'):
-          self.trainer.logger.log_image(
-            key=f"samples@global_step{self.global_step}",
-            caption=[str(i) for i in range(len(samples))],
-            images=[s for s in image_samples.float()])
+        
+        # Safely handle multiple loggers or missing log_image method
+        for logger in self.loggers:
+            if hasattr(logger, 'log_image'):
+                logger.log_image(
+                    key=f"samples@global_step{self.global_step}",
+                    caption=[str(i) for i in range(len(samples))],
+                    images=[s for s in image_samples.float()])
       else:
         if self.config.training.guidance is not None:
           guidance = {
@@ -896,6 +902,8 @@ class Diffusion(L.LightningModule):
               columns=['Generated Samples'],
               data=[[s] for s in decoded_samples])
       
+      self.config.sampling.batch_size = original_sampling_batch_size
+
       # Compute memorization metric f_mem for vision tasks
       if (self.config.is_vision and 
           getattr(self.config.eval, 'compute_f_mem', False)):
