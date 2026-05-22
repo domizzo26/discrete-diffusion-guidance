@@ -107,6 +107,7 @@ COMPUTE_F_MEM=${COMPUTE_F_MEM:-false}
 NUM_F_MEM_SAMPLES=${NUM_F_MEM_SAMPLES:-100}
 MEM_THRESHOLD=${MEM_THRESHOLD:-0.333}
 MODEL=${MODEL:-mdlm}
+RUN_NAME=${RUN_NAME:-test_single_gpu}
 
 check_cifar10_dataset_path() {
   local dataset_root="$1"
