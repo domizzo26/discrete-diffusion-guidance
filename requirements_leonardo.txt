@@ -28,6 +28,7 @@ rich==13.7.1
 safetensors==0.4.5
 scikit-learn==1.4.0
 scipy==1.13.1
+setuptools==69.5.1
 seaborn==0.13.2
 timm==0.9.16
 tokenizers==0.15.2
