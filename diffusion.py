@@ -843,12 +843,12 @@ class Diffusion(L.LightningModule):
     if (not self.trainer.sanity_checking
         and self.config.eval.generate_samples
         and self.trainer.global_rank == 0):
-      print(f"[RANK 0] Generating validation samples at step {self.global_step}...")
       original_sampling_batch_size = self.config.sampling.batch_size
-      self.config.sampling.batch_size = 1 # Generate one at a time to save VRAM
       if self.config.is_vision:
+        print(f"[RANK 0] Generating validation samples (batch size 10) at step {self.global_step}...")
         samples = []
         if self.config.training.guidance is not None:
+          self.config.sampling.batch_size = 1
           # Generate one image per class (up to 10 images)
           guidance = {
             'method': 'cfg', 'condition': 0, 'gamma': 1.0}
@@ -859,12 +859,20 @@ class Diffusion(L.LightningModule):
             self.config.guidance.condition = i
             samples.append(self.sample())
         else:
-          # Generate ten images
-          for i in range(10):
-            samples.append(self.sample())
+          # Batch generate 10 images at once for speed
+          self.config.sampling.batch_size = 10
+          samples = [self.sample()]
         image_samples = self.tokenizer.batch_decode(
           torch.concat(samples, dim=0))
         
+        # Save images locally as PNGs since we disabled WandB
+        import torchvision
+        save_path = os.path.join(os.getcwd(), f"samples_step_{self.global_step}.png")
+        # image_samples is (N, 3, 32, 32) in [0, 255]
+        grid = torchvision.utils.make_grid(image_samples.float() / 255.0, nrow=5)
+        torchvision.utils.save_image(grid, save_path)
+        print(f"[RANK 0] Validation samples saved to: {save_path}")
+
         # Safely handle multiple loggers or missing log_image method
         for logger in self.loggers:
             if hasattr(logger, 'log_image'):
