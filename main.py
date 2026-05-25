@@ -153,8 +153,10 @@ def _train(config, logger, tokenizer,
     config.trainer,
     default_root_dir=os.getcwd(),
     callbacks=callbacks,
-    strategy=hydra.utils.instantiate(config.strategy), logger=False)
+    #strategy=hydra.utils.instantiate(config.strategy), logger=False)
     #logger=wandb_logger)
+    strategy=hydra.utils.instantiate(config.strategy),
+    logger=L.pytorch.loggers.CSVLogger(save_dir=os.getcwd(), name="logs"))
     
   trainer.fit(model, train_ds, valid_ds, ckpt_path=ckpt_path)
 
