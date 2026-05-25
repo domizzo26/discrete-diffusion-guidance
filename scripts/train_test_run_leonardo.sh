@@ -62,7 +62,7 @@ export TRANSFORMERS_CACHE="/leonardo_work/IscrC_UNMASKED/.cache/huggingface"
 export NCCL_P2P_LEVEL=NVL
 export HYDRA_FULL_ERROR=1
 # Weights & Biases Config - Must be offline on compute nodes
-#export WANDB_MODE=offline
+export WANDB_MODE=offline
 
 # Expecting:
 #  - MODEL (mdlm, udlm)
@@ -207,6 +207,5 @@ srun python -u main.py --config-dir=configs \
   sampling.batch_size=4 \
   sampling.use_cache=${sampling_use_cache} \
   sampling.steps=20 \
+  wandb.name="test_sanity_check" \
   hydra.run.dir="/leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance/outputs/debug_test"
-  #wandb.name="test_sanity_check" \
-  
