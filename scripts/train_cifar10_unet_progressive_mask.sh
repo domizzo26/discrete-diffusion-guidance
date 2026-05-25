@@ -60,7 +60,7 @@ export TRANSFORMERS_CACHE="/leonardo_work/IscrC_UNMASKED/.cache/huggingface"
 export NCCL_P2P_LEVEL=NVL
 export HYDRA_FULL_ERROR=1
 # Weights & Biases Config - Must be offline on compute nodes
-export WANDB_MODE=offline
+#export WANDB_MODE=offline
 
 # Expecting:
 #  - MODEL (mdlm, udlm)
@@ -198,5 +198,6 @@ srun python -u main.py --config-dir=configs \
   sampling.batch_size=2 \
   sampling.use_cache=${sampling_use_cache} \
   sampling.steps=128 \
-  wandb.name="cifar10_${RUN_NAME}" \
   hydra.run.dir="${PWD}/outputs/cifar10/${RUN_NAME}"
+  #wandb.name="cifar10_${RUN_NAME}" \
+  

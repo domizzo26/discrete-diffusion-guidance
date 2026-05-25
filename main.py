@@ -94,11 +94,11 @@ def _print_batch(train_ds, valid_ds, tokenizer, k=64):
 def _train(config, logger, tokenizer,
            train_classifier=False):
   logger.info('Starting Training.')
-  wandb_logger = None
-  if config.get('wandb', None) is not None:
-    wandb_logger = L.pytorch.loggers.WandbLogger(
-      config=omegaconf.OmegaConf.to_object(config),
-      ** config.wandb)
+  #wandb_logger = None
+  #if config.get('wandb', None) is not None:
+    #wandb_logger = L.pytorch.loggers.WandbLogger(
+      #config=omegaconf.OmegaConf.to_object(config),
+      #** config.wandb)
 
   if (config.checkpointing.resume_from_ckpt
       and config.checkpointing.resume_ckpt_path is not None
@@ -153,8 +153,9 @@ def _train(config, logger, tokenizer,
     config.trainer,
     default_root_dir=os.getcwd(),
     callbacks=callbacks,
-    strategy=hydra.utils.instantiate(config.strategy),
-    logger=wandb_logger)
+    strategy=hydra.utils.instantiate(config.strategy), logger=False)
+    #logger=wandb_logger)
+    
   trainer.fit(model, train_ds, valid_ds, ckpt_path=ckpt_path)
 
 
