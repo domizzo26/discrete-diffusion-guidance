@@ -4,6 +4,7 @@
 """
 import itertools
 import math
+import os
 import typing
 from dataclasses import dataclass
 
@@ -13,6 +14,7 @@ import numpy as np
 import omegaconf
 import torch
 import torch.nn.functional as F
+import torchvision
 import torchmetrics
 import transformers
 try:
@@ -866,7 +868,6 @@ class Diffusion(L.LightningModule):
           torch.concat(samples, dim=0))
         
         # Save images locally as PNGs since we disabled WandB
-        import torchvision
         save_path = os.path.join(os.getcwd(), f"samples_step_{self.global_step}.png")
         # image_samples is (N, 3, 32, 32) in [0, 255]
         grid = torchvision.utils.make_grid(image_samples.float() / 255.0, nrow=5)
@@ -920,7 +921,6 @@ class Diffusion(L.LightningModule):
           if self.reference_images is None:
             ref_path = getattr(self.config.eval, 'reference_dir', None)
             if ref_path is not None:
-              import os
               from pathlib import Path
               from PIL import Image
               
