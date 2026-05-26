@@ -199,6 +199,5 @@ srun python -u main.py --config-dir=configs \
   sampling.batch_size=2 \
   sampling.use_cache=${sampling_use_cache} \
   sampling.steps=128 \
-  logger=csv \
   hydra.run.dir="${PWD}/outputs/cifar10/${RUN_NAME}"
     
