@@ -20,7 +20,6 @@
 PROJECT_ROOT="/leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance"
 DATASET_PATH=${DATASET_PATH:-${PROJECT_ROOT}/data/cifar10}
 MODEL=${MODEL:-mdlm}
-RUN_NAME=${RUN_NAME:-test_single_gpu}
 
 <<comment
 #  Usage:
@@ -208,5 +207,4 @@ srun python -u main.py --config-dir=configs \
   sampling.use_cache=${sampling_use_cache} \
   sampling.steps=20 \
   hydra.run.dir="/leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance/outputs/debug_test"
-  #wandb.name="test_sanity_check" \
   

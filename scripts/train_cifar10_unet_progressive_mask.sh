@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=mdlm_hybrid_cifar10
 #SBATCH --account=IscrC_UNMASKED
-#SBATCH --time=08:00:00
+#SBATCH --time=24:00:00
 #SBATCH --partition=boost_usr_prod
 #SBATCH --ntasks-per-node=4
 #SBATCH --cpus-per-task=8
@@ -19,6 +19,7 @@
 # For subset training, point to the preprocessed subset directory instead
 PROJECT_ROOT="/leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance"
 DATASET_PATH=${DATASET_PATH:-${PROJECT_ROOT}/data/cifar10}
+MODEL=${MODEL:-mdlm}
 
 <<comment
 #  Usage:
@@ -198,6 +199,6 @@ srun python -u main.py --config-dir=configs \
   sampling.batch_size=2 \
   sampling.use_cache=${sampling_use_cache} \
   sampling.steps=128 \
+  logger=csv \
   hydra.run.dir="${PWD}/outputs/cifar10/${RUN_NAME}"
-  #wandb.name="cifar10_${RUN_NAME}" \
-  
+    
