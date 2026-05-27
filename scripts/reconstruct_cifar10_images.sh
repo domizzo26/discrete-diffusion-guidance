@@ -1,17 +1,17 @@
 #!/bin/bash
 #SBATCH --job-name=recon_cifar10
-#SBATCH --account=3261535
+#SBATCH --account=IscrC_UNMASKED
 #SBATCH --partition=boost_usr_prod
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64gb
-#SBATCH --ntasks=1
+#SBATCH --ntasks=4
 #SBATCH --nodes=1
 #SBATCH --gpus=1
 #SBATCH --time=02:00:00
 #SBATCH --output=out/%x_%j.out
 #SBATCH --error=err/%x_%j.err
 #SBATCH --mail-type=all
-#SBATCH --mail-user=3261535+hpc@phd.unibocconi.it
+#SBATCH --mail-user=domitilla.izzo@studbocconi.it
 
 # ============================================================================
 # CIFAR-10 Image Reconstruction Script
