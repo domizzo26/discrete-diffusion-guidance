@@ -356,8 +356,9 @@ class Diffusion(L.LightningModule):
   def forward(self, x, sigma, cond=None, x_emb=None, **kwargs):
     """Returns log_probs / logits."""
     sigma = self._process_sigma(sigma)
-    device_type = x.device.type if x.device.type != 'mps' else 'cpu'  # MPS not supported by autocast
-    with torch.amp.autocast(device_type=device_type, dtype=torch.float32):
+    device_type = x.device.type if x.device.type != 'mps' else 'cpu'
+    # CPU autocast only supports bfloat16/float16. Disable for CPU float32 runs to avoid dtype warnings.
+    with torch.amp.autocast(device_type=device_type, dtype=torch.float32, enabled=device_type == 'cuda'):
       logits = self.backbone(x, sigma, cond, x_emb=x_emb, **kwargs)
 
     if self.parameterization == 'subs':

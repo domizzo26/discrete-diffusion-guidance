@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=recon_cifar10
 #SBATCH --account=3261535
-#SBATCH --partition=gpunew
+#SBATCH --partition=boost_usr_prod
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=32gb
+#SBATCH --mem=64gb
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 #SBATCH --gpus=1

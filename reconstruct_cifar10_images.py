@@ -37,6 +37,7 @@ Usage:
 import argparse
 import os
 import typing
+import gc
 from datetime import datetime
 
 import lightning as L
@@ -634,6 +635,7 @@ def main(args):
         
         # Clean up
         del model
+        gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
     
