@@ -357,8 +357,14 @@ class Diffusion(L.LightningModule):
     """Returns log_probs / logits."""
     sigma = self._process_sigma(sigma)
     device_type = x.device.type if x.device.type != 'mps' else 'cpu'
-    # CPU autocast only supports bfloat16/float16. Disable for CPU float32 runs to avoid dtype warnings.
-    with torch.amp.autocast(device_type=device_type, dtype=torch.float32, enabled=device_type == 'cuda'):
+    
+    # Use bfloat16 on GPU for efficiency, matching the DiMamba backbone preference.
+    # CPU autocast only supports bfloat16/float16. 
+    autocast_dtype = torch.bfloat16 if device_type == 'cuda' else torch.float32
+    # Disable autocast on CPU if using float32 to avoid warnings.
+    use_autocast = device_type == 'cuda' or autocast_dtype != torch.float32
+    
+    with torch.amp.autocast(device_type=device_type, dtype=autocast_dtype, enabled=use_autocast):
       logits = self.backbone(x, sigma, cond, x_emb=x_emb, **kwargs)
 
     if self.parameterization == 'subs':

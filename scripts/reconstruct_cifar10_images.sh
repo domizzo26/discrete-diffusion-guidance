@@ -4,7 +4,7 @@
 #SBATCH --partition=boost_usr_prod
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64gb
-#SBATCH --ntasks=4
+#SBATCH --ntasks=1
 #SBATCH --nodes=1
 #SBATCH --gpus=1
 #SBATCH --time=02:00:00
