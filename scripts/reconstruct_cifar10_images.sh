@@ -50,8 +50,8 @@
 # ============================================================================
 
 # Setup environment
-cd ../ || exit
-source setup_leonardo.sh
+PROJECT_ROOT="/leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance"
+source "${PROJECT_ROOT}/setup_leonardo.sh"
 export HYDRA_FULL_ERROR=1
 
 # Check required argument
@@ -72,7 +72,7 @@ MASK_FROM_TOP=${MASK_FROM_TOP:-false}
 OUTPUT_DIR=${OUTPUT_DIR:-}
 EPS=${EPS:-1e-5}
 SEED=${SEED:-42}
-DATA_DIR=${DATA_DIR:-/leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance/outputs/cifar10}
+DATA_DIR=${DATA_DIR:-/leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance/data/cifar10}
 
 echo "=============================================="
 echo "CIFAR-10 Image Reconstruction"
@@ -115,7 +115,7 @@ fi
 # Run reconstruction
 echo ""
 echo "Running reconstruction..."
-srun python -u reconstruct_cifar10_images.py ${CMD_ARGS}
+srun python -u "${PROJECT_ROOT}/reconstruct_cifar10_images.py" ${CMD_ARGS}
 
 echo ""
 echo "=============================================="
