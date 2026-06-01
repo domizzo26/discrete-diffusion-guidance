@@ -72,7 +72,7 @@ MASK_FROM_TOP=${MASK_FROM_TOP:-false}
 OUTPUT_DIR=${OUTPUT_DIR:-}
 EPS=${EPS:-1e-5}
 SEED=${SEED:-42}
-DATA_DIR=${DATA_DIR:-data/cifar10}
+DATA_DIR=${DATA_DIR:-/leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance/data/cifar10}
 
 echo "=============================================="
 echo "CIFAR-10 Image Reconstruction"
@@ -120,7 +120,7 @@ srun python -u reconstruct_cifar10_images.py ${CMD_ARGS}
 echo ""
 echo "=============================================="
 echo "Reconstruction complete!"
-echo "Check the output directory for results:"
+echo "Check the output directory outputs/cifar10/reconstructions/ for results:"
 echo "  - 00_original.png"
 echo "  - 01_masked.png"
 echo "  - 02_reconstructed_*.png (one per checkpoint)"
