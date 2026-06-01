@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "Starting setup..."
 module purge
-module load cuda/12.2
+module load cuda/12.1
 module load gcc/12
 echo "Modules loaded."
 
@@ -12,4 +12,6 @@ echo "Environment activated."
 export HF_HOME="${PWD}/.hf_cache"
 export PYTHONPATH="${PWD}:${PWD}/guidance_eval:${HF_HOME}/modules"
 export TMPDIR=$PWD/tmp_pip
+# Ensure Torch can find the CUDA libraries
+export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
 echo "Setup complete."

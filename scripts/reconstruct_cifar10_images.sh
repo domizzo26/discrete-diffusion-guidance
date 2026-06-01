@@ -51,7 +51,7 @@
 
 # Setup environment
 cd ../ || exit
-source setup_env.sh
+source setup_leonardo.sh
 export HYDRA_FULL_ERROR=1
 
 # Check required argument
