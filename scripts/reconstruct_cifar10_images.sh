@@ -67,22 +67,24 @@ export HYDRA_FULL_ERROR=1
 set -e 
 
 # Check required argument
-if [ -z "${CHECKPOINTS}" ]; then
-echo "ERROR: CHECKPOINTS is not set"
-echo "Usage: sbatch --export=ALL,CHECKPOINTS=\"path1;path2\" reconstruct_cifar10_images.sh"
-exit 1
-fi
+#if [ -z "${CHECKPOINTS}" ]; then
+#echo "ERROR: CHECKPOINTS is not set"
+#echo "Usage: sbatch --export=ALL,CHECKPOINTS=\"path1;path2\" reconstruct_cifar10_images.sh"
+#exit 1
+#fi
+
+CHECKPOINT_ARRAY=("$@")
 
 # Robustly convert semicolon-separated list to array, trimming whitespace
-IFS=';' read -ra RAW_ARRAY <<< "$CHECKPOINTS"
-CHECKPOINT_ARRAY=()
-for i in "${RAW_ARRAY[@]}"; do
+#IFS=';' read -ra RAW_ARRAY <<< "$CHECKPOINTS"
+#CHECKPOINT_ARRAY=()
+#for i in "${RAW_ARRAY[@]}"; do
     # Trim leading/trailing whitespace
-    trimmed=$(echo "$i" | xargs)
-    if [ -n "$trimmed" ]; then
-        CHECKPOINT_ARRAY+=("$trimmed")
-    fi
-done
+#    trimmed=$(echo "$i" | xargs)
+  #  if [ -n "$trimmed" ]; then
+   #     CHECKPOINT_ARRAY+=("$trimmed")
+    #fi
+#done
 
 # Set defaults
 INDEX=${INDEX:-}
@@ -120,7 +122,7 @@ echo "Data dir: ${DATA_DIR}"
 echo "=============================================="
 
 # Build command arguments
-CMD_ARGS="--checkpoints $(printf "%s " "${CHECKPOINT_ARRAY[@]}")"
+CMD_ARGS="--checkpoints \"${CHECKPOINT_ARRAY[@]// /\" \"}\""
 CMD_ARGS="${CMD_ARGS} --mask-type ${MASK_TYPE}"
 CMD_ARGS="${CMD_ARGS} --mask-percentage ${MASK_PERCENTAGE}"
 CMD_ARGS="${CMD_ARGS} --eps ${EPS}"
