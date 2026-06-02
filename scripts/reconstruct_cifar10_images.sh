@@ -62,14 +62,14 @@ source "${PROJECT_ROOT}/setup_leonardo.sh"
 export HYDRA_FULL_ERROR=1
 
 # Check required argument
-if [ -z "${CHECKPOINTS}" ]; then
-  echo "ERROR: CHECKPOINTS is not set"
-  echo "Usage: sbatch --export=ALL,CHECKPOINTS=\"path1 path2\" reconstruct_cifar10_images.sh"
-  exit 1
-fi
+#if [ -z "${CHECKPOINTS}" ]; then
+  #echo "ERROR: CHECKPOINTS is not set"
+  #echo "Usage: sbatch --export=ALL,CHECKPOINTS=\"path1 path2\" reconstruct_cifar10_images.sh"
+ # exit 1
+#fi
 
 # Convert space-separated checkpoints to array
-CHECKPOINT_ARRAY=($CHECKPOINTS)
+CHECKPOINT_ARRAY=("$@")
 
 # Set defaults
 INDEX=${INDEX:-}
