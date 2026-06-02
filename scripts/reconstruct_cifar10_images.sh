@@ -69,7 +69,8 @@ exit 1
 fi
 
 # Convert space-separated checkpoints to array
-CHECKPOINT_ARRAY=($CHECKPOINTS)
+#CHECKPOINT_ARRAY=($CHECKPOINTS)
+IFS=';' read -ra CHECKPOINT_ARRAY <<< "$CHECKPOINTS"
 
 # Set defaults
 INDEX=${INDEX:-}
