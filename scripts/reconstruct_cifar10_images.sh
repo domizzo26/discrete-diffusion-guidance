@@ -42,10 +42,10 @@
 # CHECKPOINTS - Space-separated list of checkpoint paths (required)
 #
 # Optional environment variables:
-# INDEX - Specific CIFAR-10 image index 0-49999 (default: none, uses category or random)
+# INDEX - Specific CIFAR-10 image index 0-49999 (required if CATEGORY/IMAGE_PATH not set)
 # IMAGE_PATH - Path to custom image file (overrides index/category)
 # IMAGE_LABEL - Class label for custom image (required for custom path with CFG)
-# CATEGORY - CIFAR-10 category 0-9, used if INDEX not set (default: none, picks random)
+# CATEGORY - CIFAR-10 category 0-9 (picks random image from class if INDEX not set)
 # MASK_TYPE - Mask type: partial, random, rectangle, random_blocks (default: random)
 # MASK_PERCENTAGE - Percentage to mask, 0-100 (default: 50)
 # MASK_FROM_TOP - Mask from top instead of bottom (default: false)
@@ -58,8 +58,13 @@
 
 # Setup environment
 PROJECT_ROOT="/leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance"
-source "${PROJECT_ROOT}/setup_leonardo.sh"
+cd "${PROJECT_ROOT}" || { echo "ERROR: Could not cd to ${PROJECT_ROOT}"; exit 1; }
+source "setup_leonardo.sh"
+
+# Ensure project root is in PYTHONPATH and exit on error
+export PYTHONPATH="${PROJECT_ROOT}:${PYTHONPATH}"
 export HYDRA_FULL_ERROR=1
+set -e 
 
 # Check required argument
 if [ -z "${CHECKPOINTS}" ]; then
@@ -70,7 +75,9 @@ fi
 
 # Convert space-separated checkpoints to array
 #CHECKPOINT_ARRAY=($CHECKPOINTS)
+OLD_IFS=$IFS
 IFS=';' read -ra CHECKPOINT_ARRAY <<< "$CHECKPOINTS"
+IFS=$OLD_IFS
 
 # Set defaults
 INDEX=${INDEX:-}
@@ -108,7 +115,7 @@ echo "Data dir: ${DATA_DIR}"
 echo "=============================================="
 
 # Build command arguments
-CMD_ARGS="--checkpoints ${CHECKPOINT_ARRAY[*]}"
+CMD_ARGS="--checkpoints ${CHECKPOINT_ARRAY[@]}"
 CMD_ARGS="${CMD_ARGS} --mask-type ${MASK_TYPE}"
 CMD_ARGS="${CMD_ARGS} --mask-percentage ${MASK_PERCENTAGE}"
 CMD_ARGS="${CMD_ARGS} --eps ${EPS}"
@@ -141,7 +148,7 @@ fi
 # Run reconstruction
 echo ""
 echo "Running reconstruction..."
-srun python -u "${PROJECT_ROOT}/reconstruct_cifar10_images.py" ${CMD_ARGS}
+srun python -u reconstruct_cifar10_images.py ${CMD_ARGS}
 
 echo ""
 echo "=============================================="
@@ -150,4 +157,12 @@ echo "Check the output directory outputs/cifar10/reconstructions/ for results:"
 echo " - 00_original.png"
 echo " - 01_masked.png"
 echo " - 02_reconstructed_*.png (one per checkpoint)"
+if [ -n "${OUTPUT_DIR}" ]; then
+    echo "Results saved to: ${OUTPUT_DIR}"
+else
+    # Find the most recently created directory
+    LATEST_DIR=$(ls -td outputs/cifar10/reconstructions/*/ 2>/dev/null | head -n 1)
+    echo "Results saved to: ${LATEST_DIR:-outputs/cifar10/reconstructions/}"
+    echo "Images: 00_original.png, 01_masked.png, 02_reconstructed_*.png"
+fi
 echo "=============================================="
