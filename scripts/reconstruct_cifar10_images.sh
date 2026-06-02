@@ -19,41 +19,41 @@
 # Reconstructs partially masked CIFAR-10 images using trained model(s).
 #
 # Usage:
-#   cd scripts/
-#   sbatch --export=ALL,CHECKPOINTS="path1 path2",INDEX=42 reconstruct_cifar10_images.sh
+# cd scripts/
+# sbatch --export=ALL,CHECKPOINTS="path1 path2",INDEX=42 reconstruct_cifar10_images.sh
 #
 # Examples:
-#   # Reconstruct specific image with one checkpoint
-#   sbatch --export=ALL,CHECKPOINTS="outputs/cifar10/run1/checkpoints/last.ckpt",INDEX=42 reconstruct_cifar10_images.sh
+# # Reconstruct specific image with one checkpoint
+# sbatch --export=ALL,CHECKPOINTS="outputs/cifar10/run1/checkpoints/last.ckpt",INDEX=42 reconstruct_cifar10_images.sh
 #
-#   # Multiple checkpoints
-#   sbatch --export=ALL,CHECKPOINTS="outputs/cifar10/run1/checkpoints/last.ckpt outputs/cifar10/run2/checkpoints/last.ckpt",INDEX=100 reconstruct_cifar10_images.sh
+# # Multiple checkpoints
+# sbatch --export=ALL,CHECKPOINTS="outputs/cifar10/run1/checkpoints/last.ckpt outputs/cifar10/run2/checkpoints/last.ckpt",INDEX=100 reconstruct_cifar10_images.sh
 #
-#   # Random image from category
-#   sbatch --export=ALL,CHECKPOINTS="outputs/cifar10/run1/checkpoints/last.ckpt",CATEGORY=5 reconstruct_cifar10_images.sh
+# # Random image from category
+# sbatch --export=ALL,CHECKPOINTS="outputs/cifar10/run1/checkpoints/last.ckpt",CATEGORY=5 reconstruct_cifar10_images.sh
 #
-#   # Custom masking
-#   sbatch --export=ALL,CHECKPOINTS="outputs/cifar10/run1/checkpoints/last.ckpt",MASK_PERCENTAGE=30,MASK_FROM_TOP=true reconstruct_cifar10_images.sh
+# # Custom masking
+# sbatch --export=ALL,CHECKPOINTS="outputs/cifar10/run1/checkpoints/last.ckpt",MASK_PERCENTAGE=30,MASK_FROM_TOP=true reconstruct_cifar10_images.sh
 #
-#   # Random blocks (non-overlapping scattered squares)
-#   sbatch --export=ALL,CHECKPOINTS="outputs/cifar10/run1/checkpoints/last.ckpt",MASK_TYPE=random_blocks,MASK_PERCENTAGE=40 reconstruct_cifar10_images.sh
+# # Random blocks (non-overlapping scattered squares)
+# sbatch --export=ALL,CHECKPOINTS="outputs/cifar10/run1/checkpoints/last.ckpt",MASK_TYPE=random_blocks,MASK_PERCENTAGE=40 reconstruct_cifar10_images.sh
 #
 # Required environment variables:
-#   CHECKPOINTS    - Space-separated list of checkpoint paths (required)
+# CHECKPOINTS - Space-separated list of checkpoint paths (required)
 #
 # Optional environment variables:
-#   INDEX          - Specific CIFAR-10 image index 0-49999 (default: none, uses category or random)
-#   IMAGE_PATH     - Path to custom image file or directory (overrides index/category)
-#   IMAGE_LABEL    - Class label for custom image (required for custom path with CFG)
-#   CATEGORY       - CIFAR-10 category 0-9, used if INDEX not set (default: none, picks random)
-#   MASK_TYPE      - Mask type: partial, random, random_blocks (default: random)
-#   MASK_PERCENTAGE - Percentage to mask, 0-100 (default: 50)
-#   MASK_FROM_TOP  - Mask from top instead of bottom (default: false)
-#   OUTPUT_DIR     - Output directory (default: auto-generated with timestamp)
-#   EPS            - Noise schedule epsilon (default: 1e-5)
-#   SEED           - Random seed (default: 42)
-#   SAMPLING_STEPS - Number of sampling steps (default: uses config)
-#   DATA_DIR       - CIFAR-10 data directory (default: data/cifar10)
+# INDEX - Specific CIFAR-10 image index 0-49999 (default: none, uses category or random)
+# IMAGE_PATH - Path to custom image file (overrides index/category)
+# IMAGE_LABEL - Class label for custom image (required for custom path with CFG)
+# CATEGORY - CIFAR-10 category 0-9, used if INDEX not set (default: none, picks random)
+# MASK_TYPE - Mask type: partial, random, rectangle, random_blocks (default: random)
+# MASK_PERCENTAGE - Percentage to mask, 0-100 (default: 50)
+# MASK_FROM_TOP - Mask from top instead of bottom (default: false)
+# OUTPUT_DIR - Output directory (default: auto-generated with timestamp)
+# EPS - Noise schedule epsilon (default: 1e-5)
+# SEED - Random seed (default: 42)
+# SAMPLING_STEPS - Number of sampling steps (default: uses config)
+# DATA_DIR - CIFAR-10 data directory (default: data/cifar10)
 # ============================================================================
 
 # Setup environment
@@ -62,14 +62,14 @@ source "${PROJECT_ROOT}/setup_leonardo.sh"
 export HYDRA_FULL_ERROR=1
 
 # Check required argument
-#if [ -z "${CHECKPOINTS}" ]; then
-  #echo "ERROR: CHECKPOINTS is not set"
-  #echo "Usage: sbatch --export=ALL,CHECKPOINTS=\"path1 path2\" reconstruct_cifar10_images.sh"
- # exit 1
-#fi
+if [ -z "${CHECKPOINTS}" ]; then
+echo "ERROR: CHECKPOINTS is not set"
+echo "Usage: sbatch --export=ALL,CHECKPOINTS=\"path1 path2\" reconstruct_cifar10_images.sh"
+exit 1
+fi
 
 # Convert space-separated checkpoints to array
-CHECKPOINT_ARRAY=("$@")
+CHECKPOINT_ARRAY=($CHECKPOINTS)
 
 # Set defaults
 INDEX=${INDEX:-}
@@ -88,29 +88,26 @@ DATA_DIR=${DATA_DIR:-/leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance/d
 echo "=============================================="
 echo "CIFAR-10 Image Reconstruction"
 echo "=============================================="
-echo "Checkpoints:     ${#CHECKPOINT_ARRAY[@]} checkpoint(s)"
+echo "Checkpoints: ${#CHECKPOINT_ARRAY[@]} checkpoint(s)"
 for ckpt in "${CHECKPOINT_ARRAY[@]}"; do
-  echo "  - ${ckpt}"
+echo " - ${ckpt}"
 done
-echo "Index:           ${INDEX:-auto (by category or random)}"
-echo "Image Path:      ${IMAGE_PATH:-none}"
-echo "Image Label:     ${IMAGE_LABEL:-none}"
-echo "Category:        ${CATEGORY:-auto (random)}"
-echo "Mask type:       ${MASK_TYPE}"
+echo "Index: ${INDEX:-auto (by category or random)}"
+echo "Image Path: ${IMAGE_PATH:-none}"
+echo "Image Label: ${IMAGE_LABEL:-none}"
+echo "Category: ${CATEGORY:-auto (random)}"
+echo "Mask type: ${MASK_TYPE}"
 echo "Mask percentage: ${MASK_PERCENTAGE}%"
-echo "Mask from top:   ${MASK_FROM_TOP}"
-echo "Output dir:      ${OUTPUT_DIR:-auto (timestamped)}"
-echo "Epsilon:         ${EPS}"
-echo "Sampling Steps:  ${SAMPLING_STEPS:-from config}"
-echo "Seed:            ${SEED}"
-echo "Data dir:        ${DATA_DIR}"
+echo "Mask from top: ${MASK_FROM_TOP}"
+echo "Output dir: ${OUTPUT_DIR:-auto (timestamped)}"
+echo "Epsilon: ${EPS}"
+echo "Sampling Steps: ${SAMPLING_STEPS:-from config}"
+echo "Seed: ${SEED}"
+echo "Data dir: ${DATA_DIR}"
 echo "=============================================="
 
 # Build command arguments
-CMD_ARGS="--checkpoints ${CHECKPOINT_ARRAY[*]}"
-for ckpt in "${CHECKPOINT_ARRAY[@]}"; do
-  CMD_ARGS="${CMD_ARGS} ${ckpt}"
-done
+CMD_ARGS="--checkpoints ${CHECKPOINTS}"
 CMD_ARGS="${CMD_ARGS} --mask-type ${MASK_TYPE}"
 CMD_ARGS="${CMD_ARGS} --mask-percentage ${MASK_PERCENTAGE}"
 CMD_ARGS="${CMD_ARGS} --eps ${EPS}"
@@ -119,25 +116,25 @@ CMD_ARGS="${CMD_ARGS} --data-dir ${DATA_DIR}"
 
 # Add optional arguments
 if [ -n "${INDEX}" ]; then
-  CMD_ARGS="${CMD_ARGS} --index ${INDEX}"
+CMD_ARGS="${CMD_ARGS} --index ${INDEX}"
 fi
 if [ -n "${CATEGORY}" ]; then
-  CMD_ARGS="${CMD_ARGS} --category ${CATEGORY}"
+CMD_ARGS="${CMD_ARGS} --category ${CATEGORY}"
 fi
 if [ -n "${IMAGE_PATH}" ]; then
-  CMD_ARGS="${CMD_ARGS} --image-path ${IMAGE_PATH}"
+CMD_ARGS="${CMD_ARGS} --image-path ${IMAGE_PATH}"
 fi
 if [ -n "${IMAGE_LABEL}" ]; then
-  CMD_ARGS="${CMD_ARGS} --image-label ${IMAGE_LABEL}"
+CMD_ARGS="${CMD_ARGS} --image-label ${IMAGE_LABEL}"
 fi
 if [ -n "${SAMPLING_STEPS}" ]; then
-  CMD_ARGS="${CMD_ARGS} --sampling-steps ${SAMPLING_STEPS}"
+CMD_ARGS="${CMD_ARGS} --sampling-steps ${SAMPLING_STEPS}"
 fi
 if [ -n "${OUTPUT_DIR}" ]; then
-  CMD_ARGS="${CMD_ARGS} --output-dir ${OUTPUT_DIR}"
+CMD_ARGS="${CMD_ARGS} --output-dir ${OUTPUT_DIR}"
 fi
 if [ "${MASK_FROM_TOP}" = "true" ]; then
-  CMD_ARGS="${CMD_ARGS} --no-mask-from-bottom"
+CMD_ARGS="${CMD_ARGS} --no-mask-from-bottom"
 fi
 
 # Run reconstruction
@@ -149,7 +146,7 @@ echo ""
 echo "=============================================="
 echo "Reconstruction complete!"
 echo "Check the output directory outputs/cifar10/reconstructions/ for results:"
-echo "  - 00_original.png"
-echo "  - 01_masked.png"
-echo "  - 02_reconstructed_*.png (one per checkpoint)"
+echo " - 00_original.png"
+echo " - 01_masked.png"
+echo " - 02_reconstructed_*.png (one per checkpoint)"
 echo "=============================================="
