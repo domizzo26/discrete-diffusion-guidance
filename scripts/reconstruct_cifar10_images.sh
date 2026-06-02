@@ -20,7 +20,7 @@
 #
 # Usage:
 # cd scripts/
-# sbatch --export=ALL,CHECKPOINTS="path1 path2",INDEX=42 reconstruct_cifar10_images.sh
+# sbatch [sbatch_options] reconstruct_cifar10_images.sh ckpt1.ckpt [ckpt2.ckpt ...]
 #
 # Examples:
 # # Reconstruct specific image with one checkpoint
@@ -37,9 +37,6 @@
 #
 # # Random blocks (non-overlapping scattered squares)
 # sbatch --export=ALL,CHECKPOINTS="outputs/cifar10/run1/checkpoints/last.ckpt",MASK_TYPE=random_blocks,MASK_PERCENTAGE=40 reconstruct_cifar10_images.sh
-#
-# Required environment variables:
-# CHECKPOINTS - Space-separated list of checkpoint paths (required)
 #
 # Optional environment variables:
 # INDEX - Specific CIFAR-10 image index 0-49999 (required if CATEGORY/IMAGE_PATH not set)
@@ -66,25 +63,15 @@ export PYTHONPATH="${PROJECT_ROOT}:${PYTHONPATH}"
 export HYDRA_FULL_ERROR=1
 set -e 
 
-# Check required argument
-#if [ -z "${CHECKPOINTS}" ]; then
-#echo "ERROR: CHECKPOINTS is not set"
-#echo "Usage: sbatch --export=ALL,CHECKPOINTS=\"path1;path2\" reconstruct_cifar10_images.sh"
-#exit 1
-#fi
+# Capture checkpoints from positional arguments
+if [ $# -eq 0 ]; then
+    echo "ERROR: No checkpoints provided as positional arguments."
+    echo "Usage: sbatch [options] reconstruct_cifar10_images.sh ckpt1.ckpt [ckpt2.ckpt ...]"
+    echo "Note: You can still use --export to set optional parameters like INDEX, MASK_TYPE, etc."
+    exit 1
+fi
 
 CHECKPOINT_ARRAY=("$@")
-
-# Robustly convert semicolon-separated list to array, trimming whitespace
-#IFS=';' read -ra RAW_ARRAY <<< "$CHECKPOINTS"
-#CHECKPOINT_ARRAY=()
-#for i in "${RAW_ARRAY[@]}"; do
-    # Trim leading/trailing whitespace
-#    trimmed=$(echo "$i" | xargs)
-  #  if [ -n "$trimmed" ]; then
-   #     CHECKPOINT_ARRAY+=("$trimmed")
-    #fi
-#done
 
 # Set defaults
 INDEX=${INDEX:-}
@@ -122,40 +109,28 @@ echo "Data dir: ${DATA_DIR}"
 echo "=============================================="
 
 # Build command arguments
-CMD_ARGS="--checkpoints \"${CHECKPOINT_ARRAY[@]// /\" \"}\""
-CMD_ARGS="${CMD_ARGS} --mask-type ${MASK_TYPE}"
-CMD_ARGS="${CMD_ARGS} --mask-percentage ${MASK_PERCENTAGE}"
-CMD_ARGS="${CMD_ARGS} --eps ${EPS}"
-CMD_ARGS="${CMD_ARGS} --seed ${SEED}"
-CMD_ARGS="${CMD_ARGS} --data-dir ${DATA_DIR}"
+CMD_ARGS=(
+    --checkpoints "${CHECKPOINT_ARRAY[@]}"
+    --mask-type "${MASK_TYPE}"
+    --mask-percentage "${MASK_PERCENTAGE}"
+    --eps "${EPS}"
+    --seed "${SEED}"
+    --data-dir "${DATA_DIR}"
+)
 
-# Add optional arguments
-if [ -n "${INDEX}" ]; then
-CMD_ARGS="${CMD_ARGS} --index ${INDEX}"
-fi
-if [ -n "${CATEGORY}" ]; then
-CMD_ARGS="${CMD_ARGS} --category ${CATEGORY}"
-fi
-if [ -n "${IMAGE_PATH}" ]; then
-CMD_ARGS="${CMD_ARGS} --image-path ${IMAGE_PATH}"
-fi
-if [ -n "${IMAGE_LABEL}" ]; then
-CMD_ARGS="${CMD_ARGS} --image-label ${IMAGE_LABEL}"
-fi
-if [ -n "${SAMPLING_STEPS}" ]; then
-CMD_ARGS="${CMD_ARGS} --sampling-steps ${SAMPLING_STEPS}"
-fi
-if [ -n "${OUTPUT_DIR}" ]; then
-CMD_ARGS="${CMD_ARGS} --output-dir ${OUTPUT_DIR}"
-fi
-if [ "${MASK_FROM_TOP}" = "true" ]; then
-CMD_ARGS="${CMD_ARGS} --no-mask-from-bottom"
-fi
+# Add optional arguments to the array
+[ -n "${INDEX}" ] && CMD_ARGS+=(--index "${INDEX}")
+[ -n "${CATEGORY}" ] && CMD_ARGS+=(--category "${CATEGORY}")
+[ -n "${IMAGE_PATH}" ] && CMD_ARGS+=(--image-path "${IMAGE_PATH}")
+[ -n "${IMAGE_LABEL}" ] && CMD_ARGS+=(--image-label "${IMAGE_LABEL}")
+[ -n "${SAMPLING_STEPS}" ] && CMD_ARGS+=(--sampling-steps "${SAMPLING_STEPS}")
+[ -n "${OUTPUT_DIR}" ] && CMD_ARGS+=(--output-dir "${OUTPUT_DIR}")
+[ "${MASK_FROM_TOP}" = "true" ] && CMD_ARGS+=(--no-mask-from-bottom)
 
 # Run reconstruction
 echo ""
 echo "Running reconstruction..."
-srun python -u reconstruct_cifar10_images.py ${CMD_ARGS}
+srun python -u reconstruct_cifar10_images.py "${CMD_ARGS[@]}"
 
 echo ""
 echo "=============================================="
