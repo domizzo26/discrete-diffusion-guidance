@@ -43,10 +43,10 @@
 #
 # Optional environment variables:
 #   INDEX          - Specific CIFAR-10 image index 0-49999 (default: none, uses category or random)
-#   IMAGE_PATH     - Path to custom image file (overrides index/category)
+#   IMAGE_PATH     - Path to custom image file or directory (overrides index/category)
 #   IMAGE_LABEL    - Class label for custom image (required for custom path with CFG)
 #   CATEGORY       - CIFAR-10 category 0-9, used if INDEX not set (default: none, picks random)
-#   MASK_TYPE      - Mask type: partial, random, rectangle, random_blocks (default: random)
+#   MASK_TYPE      - Mask type: partial, random, random_blocks (default: random)
 #   MASK_PERCENTAGE - Percentage to mask, 0-100 (default: 50)
 #   MASK_FROM_TOP  - Mask from top instead of bottom (default: false)
 #   OUTPUT_DIR     - Output directory (default: auto-generated with timestamp)

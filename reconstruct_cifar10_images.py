@@ -227,7 +227,7 @@ def encode_image_for_reconstruction(
         image: Image tensor (3, 32, 32) in range [0, 255]
         mask_percentage: Percentage of image to mask (0-100)
         tokenizer: Tokenizer for encoding
-        mask_type: Type of masking - 'partial', 'random', 'rectangle', or 'random_blocks'
+        mask_type: Type of masking - 'partial', 'random', or 'random_blocks'
         mask_from_bottom: If True, mask bottom portion; if False, mask top portion (only for 'partial')
         debug: If True, print detailed token statistics
     
@@ -270,20 +270,6 @@ def encode_image_for_reconstruction(
         spatial_mask = torch.rand(height, width) < (mask_percentage / 100)
         # Apply same mask across all channels
         partial_tokens_3d[:, :, spatial_mask] = tokenizer.mask_token_id
-    elif mask_type == 'rectangle':
-        # Apply a single random rectangle mask
-        height, width = 32, 32
-        target_area = int(height * width * mask_percentage / 100)
-        
-        # Random height such that target_area / h <= width
-        min_h = max(1, (target_area + width - 1) // width)
-        max_h = min(height, target_area)
-        h = torch.randint(min_h, max_h + 1, (1,)).item()
-        w = min(width, target_area // h)
-            
-        y = torch.randint(0, height - h + 1, (1,)).item()
-        x = torch.randint(0, width - w + 1, (1,)).item()
-        partial_tokens_3d[:, :, y:y+h, x:x+w] = tokenizer.mask_token_id
     elif mask_type == 'random_blocks':
         # Series of small 4x4 squares at random locations (non-overlapping)
         height, width = 32, 32
@@ -304,7 +290,7 @@ def encode_image_for_reconstruction(
             
         partial_tokens_3d[:, :, mask_map] = tokenizer.mask_token_id
     else:
-        raise ValueError(f"mask_type must be 'partial', 'random', 'rectangle', or 'random_blocks', got {mask_type}")
+        raise ValueError(f"mask_type must be 'partial', 'random', or 'random_blocks', got {mask_type}")
     
     # Flatten back to sequence
     partial_tokens = partial_tokens_3d.view(batch_size, seq_len)
@@ -748,8 +734,8 @@ if __name__ == "__main__":
         "--mask-type",
         type=str,
         default="partial",
-        choices=["partial", "random", "rectangle", "random_blocks"],
-        help="Type of masking: 'partial', 'random', 'rectangle', or 'random_blocks' (scattered squares)",
+        choices=["partial", "random", "random_blocks"],
+        help="Type of masking: 'partial', 'random', or 'random_blocks' (scattered squares)",
     )
     parser.add_argument(
         "--mask-from-bottom",
