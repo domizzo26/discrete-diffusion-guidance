@@ -23,27 +23,27 @@
 # sbatch [sbatch_options] reconstruct_cifar10_images.sh ckpt1.ckpt [ckpt2.ckpt ...]
 #
 # Examples:
-# # Reconstruct specific image with one checkpoint
-# sbatch --export=ALL,CHECKPOINTS="outputs/cifar10/run1/checkpoints/last.ckpt",INDEX=42 reconstruct_cifar10_images.sh
+# # Reconstruct specific image with one checkpoint (positional)
+# sbatch --export=ALL,INDEX=42 reconstruct_cifar10_images.sh outputs/cifar10/run1/checkpoints/last.ckpt
 #
 # # Multiple checkpoints
-# sbatch --export=ALL,CHECKPOINTS="outputs/cifar10/run1/checkpoints/last.ckpt outputs/cifar10/run2/checkpoints/last.ckpt",INDEX=100 reconstruct_cifar10_images.sh
+# sbatch --export=ALL,INDEX=100 reconstruct_cifar10_images.sh outputs/run1/checkpoints/last.ckpt outputs/run2/checkpoints/last.ckpt
 #
 # # Random image from category
-# sbatch --export=ALL,CHECKPOINTS="outputs/cifar10/run1/checkpoints/last.ckpt",CATEGORY=5 reconstruct_cifar10_images.sh
+# sbatch --export=ALL,CATEGORY=5 reconstruct_cifar10_images.sh outputs/cifar10/run1/checkpoints/last.ckpt
 #
 # # Custom masking
-# sbatch --export=ALL,CHECKPOINTS="outputs/cifar10/run1/checkpoints/last.ckpt",MASK_PERCENTAGE=30,MASK_FROM_TOP=true reconstruct_cifar10_images.sh
+# sbatch --export=ALL,MASK_PERCENTAGE=30,MASK_FROM_TOP=true reconstruct_cifar10_images.sh outputs/run1/checkpoints/last.ckpt
 #
 # # Random blocks (non-overlapping scattered squares)
-# sbatch --export=ALL,CHECKPOINTS="outputs/cifar10/run1/checkpoints/last.ckpt",MASK_TYPE=random_blocks,MASK_PERCENTAGE=40 reconstruct_cifar10_images.sh
+# sbatch --export=ALL,MASK_TYPE=random_blocks,MASK_PERCENTAGE=40 reconstruct_cifar10_images.sh outputs/run1/checkpoints/last.ckpt
 #
 # Optional environment variables:
 # INDEX - Specific CIFAR-10 image index 0-49999 (required if CATEGORY/IMAGE_PATH not set)
 # IMAGE_PATH - Path to custom image file (overrides index/category)
 # IMAGE_LABEL - Class label for custom image (required for custom path with CFG)
 # CATEGORY - CIFAR-10 category 0-9 (picks random image from class if INDEX not set)
-# MASK_TYPE - Mask type: partial, random, rectangle, random_blocks (default: random)
+# MASK_TYPE - Mask type: partial, random, random_blocks (default: random)
 # MASK_PERCENTAGE - Percentage to mask, 0-100 (default: 50)
 # MASK_FROM_TOP - Mask from top instead of bottom (default: false)
 # OUTPUT_DIR - Output directory (default: auto-generated with timestamp)

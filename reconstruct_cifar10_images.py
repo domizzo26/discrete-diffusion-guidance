@@ -836,8 +836,16 @@ if __name__ == "__main__":
         parser.error("--mask-token-fill must be in range [0, 255]")
     
     # Verify checkpoints exist
-    for ckpt in args.checkpoints:
-        if not os.path.exists(ckpt):
-            parser.error(f"Checkpoint not found: {ckpt}")
+    # Handle cases where multiple checkpoints might be passed as a single semicolon-separated string
+    processed_checkpoints = []
+    for ckpt_item in args.checkpoints:
+        # Split by semicolon and trim
+        sub_paths = [p.strip() for p in ckpt_item.split(';') if p.strip()]
+        for p in sub_paths:
+            if not os.path.exists(p):
+                parser.error(f"Checkpoint not found: {p}")
+            processed_checkpoints.append(p)
     
+    args.checkpoints = processed_checkpoints
+
     main(args)
