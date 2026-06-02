@@ -72,7 +72,7 @@ def load_cifar10_image(
     dataset = torchvision.datasets.CIFAR10(
         root=data_dir,
         train=True,
-        download=True,
+        download=False,
         transform=None,
     )
     
