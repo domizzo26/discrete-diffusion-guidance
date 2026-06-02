@@ -43,6 +43,8 @@
 #
 # Optional environment variables:
 #   INDEX          - Specific CIFAR-10 image index 0-49999 (default: none, uses category or random)
+#   IMAGE_PATH     - Path to custom image file (overrides index/category)
+#   IMAGE_LABEL    - Class label for custom image (required for custom path with CFG)
 #   CATEGORY       - CIFAR-10 category 0-9, used if INDEX not set (default: none, picks random)
 #   MASK_TYPE      - Mask type: partial, random, rectangle, random_blocks (default: random)
 #   MASK_PERCENTAGE - Percentage to mask, 0-100 (default: 50)
@@ -50,6 +52,7 @@
 #   OUTPUT_DIR     - Output directory (default: auto-generated with timestamp)
 #   EPS            - Noise schedule epsilon (default: 1e-5)
 #   SEED           - Random seed (default: 42)
+#   SAMPLING_STEPS - Number of sampling steps (default: uses config)
 #   DATA_DIR       - CIFAR-10 data directory (default: data/cifar10)
 # ============================================================================
 
@@ -70,11 +73,14 @@ CHECKPOINT_ARRAY=($CHECKPOINTS)
 
 # Set defaults
 INDEX=${INDEX:-}
+IMAGE_PATH=${IMAGE_PATH:-}
+IMAGE_LABEL=${IMAGE_LABEL:-}
 CATEGORY=${CATEGORY:-}
 MASK_TYPE=${MASK_TYPE:-random}
 MASK_PERCENTAGE=${MASK_PERCENTAGE:-50.0}
 MASK_FROM_TOP=${MASK_FROM_TOP:-false}
 OUTPUT_DIR=${OUTPUT_DIR:-}
+SAMPLING_STEPS=${SAMPLING_STEPS:-}
 EPS=${EPS:-1e-5}
 SEED=${SEED:-42}
 DATA_DIR=${DATA_DIR:-/leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance/data/cifar10}
@@ -87,12 +93,15 @@ for ckpt in "${CHECKPOINT_ARRAY[@]}"; do
   echo "  - ${ckpt}"
 done
 echo "Index:           ${INDEX:-auto (by category or random)}"
+echo "Image Path:      ${IMAGE_PATH:-none}"
+echo "Image Label:     ${IMAGE_LABEL:-none}"
 echo "Category:        ${CATEGORY:-auto (random)}"
 echo "Mask type:       ${MASK_TYPE}"
 echo "Mask percentage: ${MASK_PERCENTAGE}%"
 echo "Mask from top:   ${MASK_FROM_TOP}"
 echo "Output dir:      ${OUTPUT_DIR:-auto (timestamped)}"
 echo "Epsilon:         ${EPS}"
+echo "Sampling Steps:  ${SAMPLING_STEPS:-from config}"
 echo "Seed:            ${SEED}"
 echo "Data dir:        ${DATA_DIR}"
 echo "=============================================="
@@ -111,6 +120,15 @@ if [ -n "${INDEX}" ]; then
 fi
 if [ -n "${CATEGORY}" ]; then
   CMD_ARGS="${CMD_ARGS} --category ${CATEGORY}"
+fi
+if [ -n "${IMAGE_PATH}" ]; then
+  CMD_ARGS="${CMD_ARGS} --image-path ${IMAGE_PATH}"
+fi
+if [ -n "${IMAGE_LABEL}" ]; then
+  CMD_ARGS="${CMD_ARGS} --image-label ${IMAGE_LABEL}"
+fi
+if [ -n "${SAMPLING_STEPS}" ]; then
+  CMD_ARGS="${CMD_ARGS} --sampling-steps ${SAMPLING_STEPS}"
 fi
 if [ -n "${OUTPUT_DIR}" ]; then
   CMD_ARGS="${CMD_ARGS} --output-dir ${OUTPUT_DIR}"
