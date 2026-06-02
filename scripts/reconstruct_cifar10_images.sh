@@ -69,15 +69,20 @@ set -e
 # Check required argument
 if [ -z "${CHECKPOINTS}" ]; then
 echo "ERROR: CHECKPOINTS is not set"
-echo "Usage: sbatch --export=ALL,CHECKPOINTS=\"path1 path2\" reconstruct_cifar10_images.sh"
+echo "Usage: sbatch --export=ALL,CHECKPOINTS=\"path1;path2\" reconstruct_cifar10_images.sh"
 exit 1
 fi
 
-# Convert space-separated checkpoints to array
-#CHECKPOINT_ARRAY=($CHECKPOINTS)
-OLD_IFS=$IFS
-IFS=';' read -ra CHECKPOINT_ARRAY <<< "$CHECKPOINTS"
-IFS=$OLD_IFS
+# Robustly convert semicolon-separated list to array, trimming whitespace
+IFS=';' read -ra RAW_ARRAY <<< "$CHECKPOINTS"
+CHECKPOINT_ARRAY=()
+for i in "${RAW_ARRAY[@]}"; do
+    # Trim leading/trailing whitespace
+    trimmed=$(echo "$i" | xargs)
+    if [ -n "$trimmed" ]; then
+        CHECKPOINT_ARRAY+=("$trimmed")
+    fi
+done
 
 # Set defaults
 INDEX=${INDEX:-}
@@ -115,7 +120,7 @@ echo "Data dir: ${DATA_DIR}"
 echo "=============================================="
 
 # Build command arguments
-CMD_ARGS="--checkpoints ${CHECKPOINT_ARRAY[@]}"
+CMD_ARGS="--checkpoints ${CHECKPOINT_ARRAY[*]}"
 CMD_ARGS="${CMD_ARGS} --mask-type ${MASK_TYPE}"
 CMD_ARGS="${CMD_ARGS} --mask-percentage ${MASK_PERCENTAGE}"
 CMD_ARGS="${CMD_ARGS} --eps ${EPS}"
