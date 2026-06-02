@@ -35,12 +35,16 @@
 #   # Custom masking
 #   sbatch --export=ALL,CHECKPOINTS="outputs/cifar10/run1/checkpoints/last.ckpt",MASK_PERCENTAGE=30,MASK_FROM_TOP=true reconstruct_cifar10_images.sh
 #
+#   # Random blocks (non-overlapping scattered squares)
+#   sbatch --export=ALL,CHECKPOINTS="outputs/cifar10/run1/checkpoints/last.ckpt",MASK_TYPE=random_blocks,MASK_PERCENTAGE=40 reconstruct_cifar10_images.sh
+#
 # Required environment variables:
 #   CHECKPOINTS    - Space-separated list of checkpoint paths (required)
 #
 # Optional environment variables:
 #   INDEX          - Specific CIFAR-10 image index 0-49999 (default: none, uses category or random)
 #   CATEGORY       - CIFAR-10 category 0-9, used if INDEX not set (default: none, picks random)
+#   MASK_TYPE      - Mask type: partial, random, rectangle, random_blocks (default: random)
 #   MASK_PERCENTAGE - Percentage to mask, 0-100 (default: 50)
 #   MASK_FROM_TOP  - Mask from top instead of bottom (default: false)
 #   OUTPUT_DIR     - Output directory (default: auto-generated with timestamp)
@@ -67,6 +71,7 @@ CHECKPOINT_ARRAY=($CHECKPOINTS)
 # Set defaults
 INDEX=${INDEX:-}
 CATEGORY=${CATEGORY:-}
+MASK_TYPE=${MASK_TYPE:-random}
 MASK_PERCENTAGE=${MASK_PERCENTAGE:-50.0}
 MASK_FROM_TOP=${MASK_FROM_TOP:-false}
 OUTPUT_DIR=${OUTPUT_DIR:-}
@@ -83,6 +88,7 @@ for ckpt in "${CHECKPOINT_ARRAY[@]}"; do
 done
 echo "Index:           ${INDEX:-auto (by category or random)}"
 echo "Category:        ${CATEGORY:-auto (random)}"
+echo "Mask type:       ${MASK_TYPE}"
 echo "Mask percentage: ${MASK_PERCENTAGE}%"
 echo "Mask from top:   ${MASK_FROM_TOP}"
 echo "Output dir:      ${OUTPUT_DIR:-auto (timestamped)}"
@@ -93,6 +99,7 @@ echo "=============================================="
 
 # Build command arguments
 CMD_ARGS="--checkpoints ${CHECKPOINTS}"
+CMD_ARGS="${CMD_ARGS} --mask-type ${MASK_TYPE}"
 CMD_ARGS="${CMD_ARGS} --mask-percentage ${MASK_PERCENTAGE}"
 CMD_ARGS="${CMD_ARGS} --eps ${EPS}"
 CMD_ARGS="${CMD_ARGS} --seed ${SEED}"
