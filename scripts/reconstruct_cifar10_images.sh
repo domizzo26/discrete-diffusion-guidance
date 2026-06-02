@@ -108,7 +108,7 @@ echo "Data dir: ${DATA_DIR}"
 echo "=============================================="
 
 # Build command arguments
-CMD_ARGS="--checkpoints ${CHECKPOINTS}"
+CMD_ARGS="--checkpoints ${CHECKPOINT_ARRAY[*]}"
 CMD_ARGS="${CMD_ARGS} --mask-type ${MASK_TYPE}"
 CMD_ARGS="${CMD_ARGS} --mask-percentage ${MASK_PERCENTAGE}"
 CMD_ARGS="${CMD_ARGS} --eps ${EPS}"
