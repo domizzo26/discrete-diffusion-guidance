@@ -108,6 +108,9 @@ echo "=============================================="
 
 # Build command arguments
 CMD_ARGS="--checkpoints ${CHECKPOINT_ARRAY[*]}"
+for ckpt in "${CHECKPOINT_ARRAY[@]}"; do
+  CMD_ARGS="${CMD_ARGS} ${ckpt}"
+done
 CMD_ARGS="${CMD_ARGS} --mask-type ${MASK_TYPE}"
 CMD_ARGS="${CMD_ARGS} --mask-percentage ${MASK_PERCENTAGE}"
 CMD_ARGS="${CMD_ARGS} --eps ${EPS}"
