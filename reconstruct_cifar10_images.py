@@ -427,6 +427,7 @@ def load_model(
     cfg_condition: typing.Optional[int] = None,
     cfg_gamma: float = 1.0,
     sampling_steps: typing.Optional[int] = None,
+    deterministic: bool = False,
 ) -> typing.Tuple[diffusion.Diffusion, str]:
     """Load model from checkpoint.
     
@@ -476,11 +477,12 @@ def load_model(
     if not hasattr(config.eval, 'disable_ema'):
         config.eval.disable_ema = False
 
-    # Override sampling steps if requested
+    # Override sampling steps and settings if requested
     if sampling_steps is not None:
         if sampling_steps < 1:
             raise ValueError("sampling_steps must be >= 1")
         config.sampling.steps = sampling_steps
+    config.sampling.deterministic = deterministic
     
     # Load tokenizer and model
     tokenizer = dataloader.get_tokenizer(config)
@@ -578,6 +580,7 @@ def main(args):
             cfg_condition=label,  # Use the original image's class as guidance
             cfg_gamma=args.cfg_gamma,
             sampling_steps=args.sampling_steps,
+            deterministic=args.deterministic,
         )
         
         if use_cfg and label is not None:
@@ -811,6 +814,11 @@ if __name__ == "__main__":
         type=int,
         default=42,
         help="Random seed",
+    )
+    parser.add_argument(
+        "--deterministic",
+        action="store_true",
+        help="Use deterministic (argmax) sampling instead of Gumbel sampling",
     )
     parser.add_argument(
         "--device",

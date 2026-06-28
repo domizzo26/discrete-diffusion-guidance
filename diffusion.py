@@ -35,7 +35,9 @@ from mask_schedulers import UnmaskUnifKScheduler
 LOG2 = math.log(2)
 
 
-def _sample_categorical(categorical_probs):
+def _sample_categorical(categorical_probs, deterministic=False):
+  if deterministic:
+    return categorical_probs.argmax(dim=-1)
   gumbel_norm = (
     1e-10
     - (torch.rand_like(categorical_probs) + 1e-10).log()).to(categorical_probs.dtype)
