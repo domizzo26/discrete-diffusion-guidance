@@ -85,9 +85,6 @@ OUTPUT_DIR=${OUTPUT_DIR:-}
 SAMPLING_STEPS=${SAMPLING_STEPS:-}
 DETERMINISTIC=${DETERMINISTIC:-false}
 CFG_GAMMA=${CFG_GAMMA:-1.0}
-TEMP_SCHEDULE=${TEMP_SCHEDULE:-}
-INIT_TEMP=${INIT_TEMP:-}
-FINAL_TEMP=${FINAL_TEMP:-}
 DETERMINISTIC_THRESHOLD=${DETERMINISTIC_THRESHOLD:-}
 EPS=${EPS:-1e-5}
 SEED=${SEED:-42}
@@ -134,9 +131,6 @@ CMD_ARGS=(
 [ "${MASK_FROM_TOP}" = "true" ] && CMD_ARGS+=(--no-mask-from-bottom)
 [ "${DETERMINISTIC}" = "true" ] && CMD_ARGS+=(--deterministic)
 [ -n "${CFG_GAMMA}" ] && CMD_ARGS+=(--cfg-gamma "${CFG_GAMMA}")
-[ -n "${TEMP_SCHEDULE}" ] && CMD_ARGS+=(--temp-schedule "${TEMP_SCHEDULE}")
-[ -n "${INIT_TEMP}" ] && CMD_ARGS+=(--init-temp "${INIT_TEMP}")
-[ -n "${FINAL_TEMP}" ] && CMD_ARGS+=(--final-temp "${FINAL_TEMP}")
 [ -n "${DETERMINISTIC_THRESHOLD}" ] && CMD_ARGS+=(--deterministic-threshold "${DETERMINISTIC_THRESHOLD}")
 
 # Run reconstruction

@@ -587,10 +587,6 @@ def main(args):
         if hasattr(model, 'config') and model.config is not None:
             if not hasattr(model.config, 'sampling'):
                 model.config.sampling = omegaconf.DictConfig({})
-            if args.temp_schedule is not None:
-                model.config.sampling.temp_schedule = args.temp_schedule
-            model.config.sampling.init_temp = args.init_temp
-            model.config.sampling.final_temp = args.final_temp
             model.config.sampling.deterministic_threshold = args.deterministic_threshold
         
         if use_cfg and label is not None:
@@ -824,25 +820,6 @@ if __name__ == "__main__":
         type=int,
         default=42,
         help="Random seed",
-    )
-    parser.add_argument(
-        "--temp-schedule",
-        type=str,
-        default=None,
-        choices=["linear"],
-        help="Temperature annealing schedule (e.g. 'linear')",
-    )
-    parser.add_argument(
-        "--init-temp",
-        type=float,
-        default=1.0,
-        help="Initial temperature for Gumbel sampling (default: 1.0)",
-    )
-    parser.add_argument(
-        "--final-temp",
-        type=float,
-        default=0.0,
-        help="Final temperature at the end of sampling (default: 0.0)",
     )
     parser.add_argument(
         "--deterministic-threshold",
