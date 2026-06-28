@@ -35,9 +35,15 @@ from mask_schedulers import UnmaskUnifKScheduler
 LOG2 = math.log(2)
 
 
-def _sample_categorical(categorical_probs, deterministic=False):
-  if deterministic:
+def _sample_categorical(categorical_probs, deterministic=False, temperature=1.0):
+  if deterministic or temperature <= 0.0:
     return categorical_probs.argmax(dim=-1)
+  
+  if temperature != 1.0:
+    eps = 1e-10
+    log_probs = (categorical_probs + eps).log() / temperature
+    categorical_probs = log_probs.softmax(dim=-1)
+    
   gumbel_norm = (
     1e-10
     - (torch.rand_like(categorical_probs) + 1e-10).log()).to(categorical_probs.dtype)
@@ -1482,6 +1488,24 @@ class Diffusion(L.LightningModule):
 
     for i in pbar:
       t = timesteps[i]
+      # Dynamically update sampling settings in config if a schedule is configured
+      if hasattr(self, 'config') and self.config is not None:
+        sampling_config = getattr(self.config, 'sampling', None)
+        if sampling_config is not None:
+          t_val = t.item() if hasattr(t, 'item') else float(t)
+          
+          # 1. Deterministic threshold schedule
+          det_threshold = getattr(sampling_config, 'deterministic_threshold', 0.0)
+          if det_threshold > 0.0:
+            sampling_config.deterministic = (t_val < det_threshold)
+            
+          # 2. Temperature schedule (e.g., linear)
+          temp_schedule = getattr(sampling_config, 'temp_schedule', None)
+          if temp_schedule == 'linear':
+            init_temp = getattr(sampling_config, 'init_temp', 1.0)
+            final_temp = getattr(sampling_config, 'final_temp', 0.0)
+            current_temp = final_temp + (init_temp - final_temp) * t_val
+            sampling_config.temperature = max(0.0, current_temp)
       if self.T > 0:  # t in {1/T,..., 1}, to match training
         t = (t * self.T).to(torch.int)
         t = t / self.T
@@ -1591,7 +1615,14 @@ class Diffusion(L.LightningModule):
         f"Diffusion type {self.diffusion} not implemented.")
 
     # Sample from posterior
-    xs = _sample_categorical(q_xs)
+    deterministic = False
+    temperature = 1.0
+    if hasattr(self, 'config') and self.config is not None:
+      sampling_config = getattr(self.config, 'sampling', None)
+      if sampling_config is not None:
+        deterministic = getattr(sampling_config, 'deterministic', False)
+        temperature = getattr(sampling_config, 'temperature', 1.0)
+    xs = _sample_categorical(q_xs, deterministic=deterministic, temperature=temperature)
     if self.diffusion == 'absorbing_state':
       copy_flag = (xt != self.mask_index).to(torch.bool)
       q_xs[copy_flag] = 0.0
@@ -1679,7 +1710,14 @@ class Diffusion(L.LightningModule):
           f"Diffusion type {self.diffusion} not implemented.")
 
     # Sample from posterior
-    xs = _sample_categorical(q_xs)
+    deterministic = False
+    temperature = 1.0
+    if hasattr(self, 'config') and self.config is not None:
+      sampling_config = getattr(self.config, 'sampling', None)
+      if sampling_config is not None:
+        deterministic = getattr(sampling_config, 'deterministic', False)
+        temperature = getattr(sampling_config, 'temperature', 1.0)
+    xs = _sample_categorical(q_xs, deterministic=deterministic, temperature=temperature)
     if self.diffusion == 'absorbing_state':
       copy_flag = (xt != self.mask_index).to(torch.bool)
       q_xs[copy_flag] = 0.0
@@ -1797,7 +1835,14 @@ class Diffusion(L.LightningModule):
 
     guided_probs = guided_log_probs.softmax(dim=-1)
     # Sample from guided posterior
-    xs = _sample_categorical(guided_probs)
+    deterministic = False
+    temperature = 1.0
+    if hasattr(self, 'config') and self.config is not None:
+      sampling_config = getattr(self.config, 'sampling', None)
+      if sampling_config is not None:
+        deterministic = getattr(sampling_config, 'deterministic', False)
+        temperature = getattr(sampling_config, 'temperature', 1.0)
+    xs = _sample_categorical(guided_probs, deterministic=deterministic, temperature=temperature)
     if self.diffusion == 'absorbing_state':
       xs = torch.where(copy_flag.to(bool), xt, xs)
     return xs, guided_probs, {'log_x_theta': log_x_theta,
@@ -1912,7 +1957,14 @@ class Diffusion(L.LightningModule):
       raise NotImplementedError(
         f"Diffusion type {self.diffusion} not implemented.")
 
-    xs = _sample_categorical(guided_probs)
+    deterministic = False
+    temperature = 1.0
+    if hasattr(self, 'config') and self.config is not None:
+      sampling_config = getattr(self.config, 'sampling', None)
+      if sampling_config is not None:
+        deterministic = getattr(sampling_config, 'deterministic', False)
+        temperature = getattr(sampling_config, 'temperature', 1.0)
+    xs = _sample_categorical(guided_probs, deterministic=deterministic, temperature=temperature)
     if self.diffusion == 'absorbing_state':
       xs = torch.where(copy_flag, xt, xs)
 
