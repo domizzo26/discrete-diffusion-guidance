@@ -86,7 +86,8 @@ SAMPLING_STEPS=${SAMPLING_STEPS:-}
 DETERMINISTIC=${DETERMINISTIC:-false}
 CFG_GAMMA=${CFG_GAMMA:-1.0}
 DETERMINISTIC_THRESHOLD=${DETERMINISTIC_THRESHOLD:-}
-NO_T_START_SCALING=${NO_T_START_SCALING:-false}
+TOP_K=${TOP_K:-}
+TOP_P=${TOP_P:-}
 EPS=${EPS:-1e-5}
 SEED=${SEED:-42}
 DATA_DIR=${DATA_DIR:-/leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance/data/cifar10}
@@ -133,7 +134,8 @@ CMD_ARGS=(
 [ "${DETERMINISTIC}" = "true" ] && CMD_ARGS+=(--deterministic)
 [ -n "${CFG_GAMMA}" ] && CMD_ARGS+=(--cfg-gamma "${CFG_GAMMA}")
 [ -n "${DETERMINISTIC_THRESHOLD}" ] && CMD_ARGS+=(--deterministic-threshold "${DETERMINISTIC_THRESHOLD}")
-[ "${NO_T_START_SCALING}" = "true" ] && CMD_ARGS+=(--no-t-start-scaling)
+[ -n "${TOP_K}" ] && CMD_ARGS+=(--top-k "${TOP_K}")
+[ -n "${TOP_P}" ] && CMD_ARGS+=(--top-p "${TOP_P}")
 
 # Run reconstruction
 echo ""

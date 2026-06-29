@@ -553,7 +553,8 @@ def main(args):
     print(f"Sampling Settings:")
     print(f"  Deterministic: {args.deterministic}")
     print(f"  Deterministic Threshold: {args.deterministic_threshold}")
-    print(f"  No t_start Scaling: {args.no_t_start_scaling}")
+    print(f"  Top-K: {args.top_k}")
+    print(f"  Top-P: {args.top_p}")
     
     if use_cfg:
         print(f"\nCFG Guidance: ENABLED (label provided)")
@@ -593,7 +594,8 @@ def main(args):
             if not hasattr(model.config, 'sampling'):
                 model.config.sampling = omegaconf.DictConfig({})
             model.config.sampling.deterministic_threshold = args.deterministic_threshold
-            model.config.sampling.no_t_start_scaling = args.no_t_start_scaling
+            model.config.sampling.top_k = args.top_k
+            model.config.sampling.top_p = args.top_p
         
         if use_cfg and label is not None:
             class_name = get_class_name(label) if label < 10 else "custom"
@@ -839,9 +841,16 @@ if __name__ == "__main__":
         help="Use deterministic (argmax) sampling instead of Gumbel sampling",
     )
     parser.add_argument(
-        "--no-t-start-scaling",
-        action="store_true",
-        help="Do not scale t_start by mask fraction (always start sampling from t=1.0)",
+        "--top-k",
+        type=int,
+        default=0,
+        help="Keep only top k candidate tokens during sampling (default: 0 = disabled)",
+    )
+    parser.add_argument(
+        "--top-p",
+        type=float,
+        default=0.0,
+        help="Keep only candidate tokens with cumulative probability <= top_p (default: 0.0 = disabled)",
     )
     parser.add_argument(
         "--device",
