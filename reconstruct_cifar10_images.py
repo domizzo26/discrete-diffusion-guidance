@@ -555,6 +555,7 @@ def main(args):
     print(f"  Deterministic Threshold: {args.deterministic_threshold}")
     print(f"  Top-K: {args.top_k}")
     print(f"  Top-P: {args.top_p}")
+    print(f"  Scale T Start: {args.scale_t_start}")
     
     if use_cfg:
         print(f"\nCFG Guidance: ENABLED (label provided)")
@@ -596,6 +597,7 @@ def main(args):
             model.config.sampling.deterministic_threshold = args.deterministic_threshold
             model.config.sampling.top_k = args.top_k
             model.config.sampling.top_p = args.top_p
+            model.config.sampling.scale_t_start = args.scale_t_start
         
         if use_cfg and label is not None:
             class_name = get_class_name(label) if label < 10 else "custom"
@@ -851,6 +853,11 @@ if __name__ == "__main__":
         type=float,
         default=0.0,
         help="Keep only candidate tokens with cumulative probability <= top_p (default: 0.0 = disabled)",
+    )
+    parser.add_argument(
+        "--scale-t-start",
+        action="store_true",
+        help="Scale t_start by mask fraction (default: False, starts from t=1.0)",
     )
     parser.add_argument(
         "--device",

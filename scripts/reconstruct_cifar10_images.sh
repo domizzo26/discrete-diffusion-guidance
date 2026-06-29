@@ -88,6 +88,7 @@ CFG_GAMMA=${CFG_GAMMA:-1.0}
 DETERMINISTIC_THRESHOLD=${DETERMINISTIC_THRESHOLD:-}
 TOP_K=${TOP_K:-}
 TOP_P=${TOP_P:-}
+SCALE_T_START=${SCALE_T_START:-false}
 EPS=${EPS:-1e-5}
 SEED=${SEED:-42}
 DATA_DIR=${DATA_DIR:-/leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance/data/cifar10}
@@ -136,6 +137,7 @@ CMD_ARGS=(
 [ -n "${DETERMINISTIC_THRESHOLD}" ] && CMD_ARGS+=(--deterministic-threshold "${DETERMINISTIC_THRESHOLD}")
 [ -n "${TOP_K}" ] && CMD_ARGS+=(--top-k "${TOP_K}")
 [ -n "${TOP_P}" ] && CMD_ARGS+=(--top-p "${TOP_P}")
+[ "${SCALE_T_START}" = "true" ] && CMD_ARGS+=(--scale-t-start)
 
 # Run reconstruction
 echo ""
