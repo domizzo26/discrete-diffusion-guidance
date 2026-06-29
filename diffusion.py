@@ -1473,6 +1473,8 @@ class Diffusion(L.LightningModule):
         t_start = 1.0
       else:
         t_start = mask_fraction * (1.0 - eps) + eps
+        
+      print(f"[DEBUG] mask_fraction: {mask_fraction:.4f}, t_start: {t_start:.4f}")
       
       if scale_steps_by_mask:
         # For reconstruction, scale steps by fraction of masked tokens

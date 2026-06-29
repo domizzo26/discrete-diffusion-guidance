@@ -550,6 +550,11 @@ def main(args):
     use_cfg = label is not None
     
     # Display guidance settings
+    print(f"Sampling Settings:")
+    print(f"  Deterministic: {args.deterministic}")
+    print(f"  Deterministic Threshold: {args.deterministic_threshold}")
+    print(f"  No t_start Scaling: {args.no_t_start_scaling}")
+    
     if use_cfg:
         print(f"\nCFG Guidance: ENABLED (label provided)")
         print(f"  Gamma (guidance strength): {args.cfg_gamma}")
