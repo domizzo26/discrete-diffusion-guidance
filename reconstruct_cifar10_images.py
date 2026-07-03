@@ -716,7 +716,7 @@ def main(args):
         print(f"Number of masked tokens: {num_masked}/{partial_tokens.numel()}")
         
         # Reconstruct
-        if args.sar-mode:
+        if args.sar_mode:
             if args.mask_type != 'partial' or not args.mask_from_bottom:
                 print("WARNING: SAR Row mode works best with '--mask-type partial' and masking from bottom.")
             
@@ -959,7 +959,7 @@ if __name__ == "__main__":
     )
     
     parser.add_argument(
-        "--sar-mode",
+        "--sar_mode",
         action="store_true",
         help="Enable top-down, semi-autoregressive row completion instead of standard global diffusion.",
     )
