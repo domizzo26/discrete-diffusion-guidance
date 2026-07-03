@@ -83,6 +83,10 @@ MASK_PERCENTAGE=${MASK_PERCENTAGE:-50.0}
 MASK_FROM_TOP=${MASK_FROM_TOP:-false}
 OUTPUT_DIR=${OUTPUT_DIR:-}
 SAMPLING_STEPS=${SAMPLING_STEPS:-}
+DETERMINISTIC=${DETERMINISTIC:-false}
+CFG_GAMMA=${CFG_GAMMA:-1.0}
+DETERMINISTIC_THRESHOLD=${DETERMINISTIC_THRESHOLD:-}
+
 EPS=${EPS:-1e-5}
 SEED=${SEED:-42}
 DATA_DIR=${DATA_DIR:-/leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance/data/cifar10}
@@ -126,6 +130,10 @@ CMD_ARGS=(
 [ -n "${SAMPLING_STEPS}" ] && CMD_ARGS+=(--sampling-steps "${SAMPLING_STEPS}")
 [ -n "${OUTPUT_DIR}" ] && CMD_ARGS+=(--output-dir "${OUTPUT_DIR}")
 [ "${MASK_FROM_TOP}" = "true" ] && CMD_ARGS+=(--no-mask-from-bottom)
+[ "${DETERMINISTIC}" = "true" ] && CMD_ARGS+=(--deterministic)
+[ -n "${CFG_GAMMA}" ] && CMD_ARGS+=(--cfg-gamma "${CFG_GAMMA}")
+[ -n "${DETERMINISTIC_THRESHOLD}" ] && CMD_ARGS+=(--deterministic-threshold "${DETERMINISTIC_THRESHOLD}")
+
 
 # Run reconstruction
 echo ""

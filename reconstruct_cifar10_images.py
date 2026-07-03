@@ -553,7 +553,6 @@ def main(args):
     print(f"Sampling Settings:")
     print(f"  Deterministic: {args.deterministic}")
     print(f"  Deterministic Threshold: {args.deterministic_threshold}")
-    print(f"  Scale T Start: {args.scale_t_start}")
     
     if use_cfg:
         print(f"\nCFG Guidance: ENABLED (label provided)")
@@ -593,7 +592,6 @@ def main(args):
             if not hasattr(model.config, 'sampling'):
                 model.config.sampling = omegaconf.DictConfig({})
             model.config.sampling.deterministic_threshold = args.deterministic_threshold
-            model.config.sampling.scale_t_start = args.scale_t_start
         
         if use_cfg and label is not None:
             class_name = get_class_name(label) if label < 10 else "custom"
@@ -839,11 +837,7 @@ if __name__ == "__main__":
         help="Use deterministic (argmax) sampling instead of Gumbel sampling",
     )
 
-    parser.add_argument(
-        "--scale-t-start",
-        action="store_true",
-        help="Scale t_start by mask fraction (default: False, starts from t=1.0)",
-    )
+
     parser.add_argument(
         "--device",
         type=str,

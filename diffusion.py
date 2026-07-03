@@ -1464,16 +1464,7 @@ class Diffusion(L.LightningModule):
       # Start at intermediate noise level based on mask fraction
       # Unmasked tokens are already clean, masked tokens should start at noise level proportional to mask_fraction
       # Full mask (100%) -> t_start = 1.0 (full noise), No mask (0%) -> t_start = eps (nearly clean)
-      scale_t = False
-      if hasattr(self, 'config') and self.config is not None:
-        sampling_config = getattr(self.config, 'sampling', None)
-        if sampling_config is not None:
-          scale_t = getattr(sampling_config, 'scale_t_start', False)
-          
-      if scale_t:
-        t_start = mask_fraction * (1.0 - eps) + eps
-      else:
-        t_start = 1.0
+      t_start = mask_fraction * (1.0 - eps) + eps
       
       if scale_steps_by_mask:
         # For reconstruction, scale steps by fraction of masked tokens
