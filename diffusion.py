@@ -35,31 +35,9 @@ from mask_schedulers import UnmaskUnifKScheduler
 LOG2 = math.log(2)
 
 
-def _sample_categorical(categorical_probs, deterministic=False, top_k=0, top_p=0.0):
+def _sample_categorical(categorical_probs, deterministic=False):
   if deterministic:
     return categorical_probs.argmax(dim=-1)
-
-  # 1. Top-k filtering
-  if top_k > 0:
-    values, _ = torch.topk(categorical_probs, top_k, dim=-1)
-    min_values = values[..., -1].unsqueeze(-1)
-    categorical_probs = torch.where(categorical_probs < min_values, torch.zeros_like(categorical_probs), categorical_probs)
-    categorical_probs = categorical_probs / (categorical_probs.sum(dim=-1, keepdim=True) + 1e-10)
-
-  # 2. Top-p (Nucleus) filtering
-  if top_p > 0.0:
-    sorted_probs, sorted_indices = torch.sort(categorical_probs, descending=True, dim=-1)
-    cumulative_probs = torch.cumsum(sorted_probs, dim=-1)
-    
-    sorted_indices_to_remove = cumulative_probs > top_p
-    sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
-    sorted_indices_to_remove[..., 0] = 0
-    
-    indices_to_remove = torch.zeros_like(categorical_probs, dtype=torch.bool)
-    indices_to_remove.scatter_(dim=-1, index=sorted_indices, src=sorted_indices_to_remove)
-    
-    categorical_probs = torch.where(indices_to_remove, torch.zeros_like(categorical_probs), categorical_probs)
-    categorical_probs = categorical_probs / (categorical_probs.sum(dim=-1, keepdim=True) + 1e-10)
 
   gumbel_norm = (
     1e-10
@@ -1634,15 +1612,11 @@ class Diffusion(L.LightningModule):
 
     # Sample from posterior
     deterministic = False
-    top_k = 0
-    top_p = 0.0
     if hasattr(self, 'config') and self.config is not None:
       sampling_config = getattr(self.config, 'sampling', None)
       if sampling_config is not None:
         deterministic = getattr(sampling_config, 'deterministic', False)
-        top_k = getattr(sampling_config, 'top_k', 0)
-        top_p = getattr(sampling_config, 'top_p', 0.0)
-    xs = _sample_categorical(q_xs, deterministic=deterministic, top_k=top_k, top_p=top_p)
+    xs = _sample_categorical(q_xs, deterministic=deterministic)
     if self.diffusion == 'absorbing_state':
       copy_flag = (xt != self.mask_index).to(torch.bool)
       q_xs[copy_flag] = 0.0
@@ -1731,15 +1705,11 @@ class Diffusion(L.LightningModule):
 
     # Sample from posterior
     deterministic = False
-    top_k = 0
-    top_p = 0.0
     if hasattr(self, 'config') and self.config is not None:
       sampling_config = getattr(self.config, 'sampling', None)
       if sampling_config is not None:
         deterministic = getattr(sampling_config, 'deterministic', False)
-        top_k = getattr(sampling_config, 'top_k', 0)
-        top_p = getattr(sampling_config, 'top_p', 0.0)
-    xs = _sample_categorical(q_xs, deterministic=deterministic, top_k=top_k, top_p=top_p)
+    xs = _sample_categorical(q_xs, deterministic=deterministic)
     if self.diffusion == 'absorbing_state':
       copy_flag = (xt != self.mask_index).to(torch.bool)
       q_xs[copy_flag] = 0.0
@@ -1858,15 +1828,11 @@ class Diffusion(L.LightningModule):
     guided_probs = guided_log_probs.softmax(dim=-1)
     # Sample from guided posterior
     deterministic = False
-    top_k = 0
-    top_p = 0.0
     if hasattr(self, 'config') and self.config is not None:
       sampling_config = getattr(self.config, 'sampling', None)
       if sampling_config is not None:
         deterministic = getattr(sampling_config, 'deterministic', False)
-        top_k = getattr(sampling_config, 'top_k', 0)
-        top_p = getattr(sampling_config, 'top_p', 0.0)
-    xs = _sample_categorical(guided_probs, deterministic=deterministic, top_k=top_k, top_p=top_p)
+    xs = _sample_categorical(guided_probs, deterministic=deterministic)
     if self.diffusion == 'absorbing_state':
       xs = torch.where(copy_flag.to(bool), xt, xs)
     return xs, guided_probs, {'log_x_theta': log_x_theta,
@@ -1982,15 +1948,11 @@ class Diffusion(L.LightningModule):
         f"Diffusion type {self.diffusion} not implemented.")
 
     deterministic = False
-    top_k = 0
-    top_p = 0.0
     if hasattr(self, 'config') and self.config is not None:
       sampling_config = getattr(self.config, 'sampling', None)
       if sampling_config is not None:
         deterministic = getattr(sampling_config, 'deterministic', False)
-        top_k = getattr(sampling_config, 'top_k', 0)
-        top_p = getattr(sampling_config, 'top_p', 0.0)
-    xs = _sample_categorical(guided_probs, deterministic=deterministic, top_k=top_k, top_p=top_p)
+    xs = _sample_categorical(guided_probs, deterministic=deterministic)
     if self.diffusion == 'absorbing_state':
       xs = torch.where(copy_flag, xt, xs)
 

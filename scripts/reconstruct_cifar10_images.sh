@@ -86,8 +86,6 @@ SAMPLING_STEPS=${SAMPLING_STEPS:-}
 DETERMINISTIC=${DETERMINISTIC:-false}
 CFG_GAMMA=${CFG_GAMMA:-1.0}
 DETERMINISTIC_THRESHOLD=${DETERMINISTIC_THRESHOLD:-}
-TOP_K=${TOP_K:-}
-TOP_P=${TOP_P:-}
 SCALE_T_START=${SCALE_T_START:-false}
 EPS=${EPS:-1e-5}
 SEED=${SEED:-42}
@@ -135,8 +133,6 @@ CMD_ARGS=(
 [ "${DETERMINISTIC}" = "true" ] && CMD_ARGS+=(--deterministic)
 [ -n "${CFG_GAMMA}" ] && CMD_ARGS+=(--cfg-gamma "${CFG_GAMMA}")
 [ -n "${DETERMINISTIC_THRESHOLD}" ] && CMD_ARGS+=(--deterministic-threshold "${DETERMINISTIC_THRESHOLD}")
-[ -n "${TOP_K}" ] && CMD_ARGS+=(--top-k "${TOP_K}")
-[ -n "${TOP_P}" ] && CMD_ARGS+=(--top-p "${TOP_P}")
 [ "${SCALE_T_START}" = "true" ] && CMD_ARGS+=(--scale-t-start)
 
 # Run reconstruction
