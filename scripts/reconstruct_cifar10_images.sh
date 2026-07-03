@@ -86,7 +86,7 @@ SAMPLING_STEPS=${SAMPLING_STEPS:-}
 DETERMINISTIC=${DETERMINISTIC:-false}
 CFG_GAMMA=${CFG_GAMMA:-1.0}
 DETERMINISTIC_THRESHOLD=${DETERMINISTIC_THRESHOLD:-}
-
+SAR_MODE=${SAR_MODE:-false}
 EPS=${EPS:-1e-5}
 SEED=${SEED:-42}
 DATA_DIR=${DATA_DIR:-/leonardo_work/IscrC_UNMASKED/discrete-diffusion-guidance/data/cifar10}
@@ -133,7 +133,7 @@ CMD_ARGS=(
 [ "${DETERMINISTIC}" = "true" ] && CMD_ARGS+=(--deterministic)
 [ -n "${CFG_GAMMA}" ] && CMD_ARGS+=(--cfg-gamma "${CFG_GAMMA}")
 [ -n "${DETERMINISTIC_THRESHOLD}" ] && CMD_ARGS+=(--deterministic-threshold "${DETERMINISTIC_THRESHOLD}")
-
+[ "${SAR_MODE}" = "true" ] && CMD_ARGS+=(--sar-mode)
 
 # Run reconstruction
 echo ""
