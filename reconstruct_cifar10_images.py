@@ -51,6 +51,85 @@ from tqdm import tqdm
 import dataloader
 import diffusion
 
+import torch
+import torch.nn.functional as F
+
+@torch.no_grad()
+def semi_autoregressive_row_complete(model, x_original, mask_percentage=70):
+    """
+    Executes a top-down, row-by-row autoregressive completion.
+    Keeps the unmasked top rows as a permanent prefix, while each subsequent 
+    row below is cleanly generated via localized diffusion steps.
+    """
+    model.eval()
+    
+    # x_original comes in as flat tokens (B, 3072) for CIFAR-10 (3 * 32 * 32)
+    B, seq_len = x_original.shape
+    C, H, W = 3, 32, 32  # CIFAR-10 dimensions matching your _q_xt function
+    
+    # Reshape to a 4D image tensor to easily work with rows
+    x_image = x_original.clone().view(B, C, H, W)
+    
+    # Calculate exactly which row the mask should start on based on percentage
+    # e.g., 70% mask means we preserve the top 30% of rows (approx row 10 out of 32)
+    mask_start_row = int(H * (1.0 - (mask_percentage / 100.0)))
+    mask_start_row = max(0, min(mask_start_row, H - 1))
+    
+    mask_index = model.mask_index
+    
+    # Pre-mask everything from the starting row all the way to the bottom
+    x_image[:, :, mask_start_row:, :] = mask_index
+    
+    # Set localized steps per row (20-30 steps per row provides great stability)
+    steps_per_row = 25 
+    
+    print(f"===> Starting SAR Row Completion. Preserving top {mask_start_row} rows.")
+    
+    # Loop over each masked row sequentially (Autoregressive macro-steps)
+    for r in range(mask_start_row, H):
+        print(f"Generating Row {r}/{H-1}...")
+        
+        # Micro-diffusion loop just for the current row 'r'
+        timesteps = torch.linspace(1.0, 1e-5, steps_per_row, device=model.device)
+        dt = 1.0 / steps_per_row
+        
+        for t in timesteps:
+            t_tensor = t * torch.ones(B, 1, device=model.device)
+            sigma_t, _ = model.noise(t_tensor)
+            sigma_s, _ = model.noise(t_tensor - dt)
+            
+            # Match dimensionality adjustments from diffusion.py
+            if sigma_t.ndim > 1: sigma_t = sigma_t.squeeze(-1)
+            if sigma_s.ndim > 1: sigma_s = sigma_s.squeeze(-1)
+            
+            move_chance_t = (1 - torch.exp(-sigma_t))[:, None, None]
+            move_chance_s = (1 - torch.exp(-sigma_s))[:, None, None]
+            
+            # Flatten back to (B, 3072) to feed into the UNet backbone
+            x_flattened = x_image.view(B, -1)
+            
+            # Forward pass through your UNet model
+            log_x_theta = model.forward(x_flattened, sigma_t, cond=None)
+            x_theta = log_x_theta.exp()
+            
+            # Compute posterior probabilities using the codebase's formula
+            # absorbing_state: q_xs = x_theta * (move_chance_t - move_chance_s) / move_chance_t
+            q_xs = x_theta * (move_chance_t - move_chance_s)
+            q_xs[:, :, mask_index] = move_chance_s[:, :, 0]
+            q_xs /= move_chance_t
+            
+            # Sample using strict argmax (deterministic) to lock in structure safely
+            # This completely avoids the broken Top-P pixel noise collapse
+            from diffusion import _sample_categorical
+            xs = _sample_categorical(q_xs, deterministic=True)
+            xs_image = xs.view(B, C, H, W)
+            
+            # CRITICAL OVERWRITE: Only commit row 'r'
+            # This isolates the generation so row r+1 cannot bleed backward into row r
+            x_image[:, :, r, :] = xs_image[:, :, r, :]
+            
+    # Return flattened back to (B, 3072) so the rest of your saving pipeline works
+    return x_image.view(B, -1)
 
 def load_cifar10_image(
     index: typing.Optional[int] = None,
@@ -379,6 +458,29 @@ def reconstruct_image(
         
     return reconstructed_image.squeeze(0)  # (3, 32, 32)
 
+def reconstruct_image_sar(
+    model,
+    original_image,
+    mask_percentage: float,
+) -> torch.Tensor:
+    """Helper wrapper to cleanly plug SAR generation into the main pipeline."""
+    # 1. Fetch clean, full target tokens from the original image tensor
+    image_batch = original_image.unsqueeze(0).to(model.device)  # (1, 3, 32, 32)
+    clean_tokens = model.tokenizer.batch_encode(image_batch)    # (1, 3072)
+
+    # 2. Execute row completion
+    reconstructed_tokens = semi_autoregressive_row_complete(
+        model=model,
+        x_original=clean_tokens,
+        mask_percentage=mask_percentage
+    )
+
+    # 3. Safely decode back to a image spatial tensor
+    reconstructed_image = model.tokenizer.batch_decode(reconstructed_tokens).float()
+    reconstructed_image = torch.clamp(reconstructed_image, 0, 255)
+    
+    return reconstructed_image.squeeze(0)  # (3, 32, 32)
+
 
 def save_image(image: torch.Tensor, path: str):
     """Save image tensor to disk.
@@ -614,14 +716,25 @@ def main(args):
         print(f"Number of masked tokens: {num_masked}/{partial_tokens.numel()}")
         
         # Reconstruct
-        print(f"Reconstructing (using {model.config.sampling.steps} sampling steps)...")
-        reconstructed_image = reconstruct_image(
-            model,
-            partial_tokens,
-            eps=args.eps,
-            mask_token_fill=args.mask_token_fill,
-            log_token_stats=args.debug_tokens,
-        )
+        if args.sar-mode:
+            if args.mask_type != 'partial' or not args.mask_from_bottom:
+                print("WARNING: SAR Row mode works best with '--mask-type partial' and masking from bottom.")
+            
+            print(f"Executing Semi-Autoregressive Row Completion (SAR Mode)...")
+            reconstructed_image = reconstruct_image_sar(
+                model=model,
+                original_image=original_image,
+                mask_percentage=args.mask_percentage
+            )
+        else:
+            print(f"Reconstructing via standard global diffusion (using {model.config.sampling.steps} sampling steps)...")
+            reconstructed_image = reconstruct_image(
+                model,
+                partial_tokens,
+                args.eps,
+                mask_token_fill=args.mask_token_fill,
+                log_token_stats=args.debug_tokens,
+            )
 
         if args.debug_tokens:
             height = original_image.shape[1]
@@ -843,6 +956,12 @@ if __name__ == "__main__":
         type=str,
         default=None,
         help="Device to use (cuda/mps/cpu). If not specified, auto-detects best available.",
+    )
+    
+    parser.add_argument(
+        "--sar-mode",
+        action="store_true",
+        help="Enable top-down, semi-autoregressive row completion instead of standard global diffusion.",
     )
     
     args = parser.parse_args()
