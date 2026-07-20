@@ -959,7 +959,7 @@ if __name__ == "__main__":
     )
     
     parser.add_argument(
-        "--sar_mode",
+        "--sar-mode",
         action="store_true",
         help="Enable top-down, semi-autoregressive row completion instead of standard global diffusion.",
     )
