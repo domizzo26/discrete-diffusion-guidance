@@ -486,57 +486,53 @@ class Diffusion(L.LightningModule):
     return t
 
   def _q_xt(self, x, move_chance):
-    """Computes the noisy sample xt.
-
-    Args:
-      x: int torch.Tensor with shape (batch_size,
-          diffusion_model_input_length), input.
-      move_chance: float torch.Tensor with shape
-        (batch_size, 1).
-    """
+    """Computes the noisy sample xt with correct spatial RGB mask topology."""
     batch_size, seq_len = x.shape
     is_progressive = torch.rand(batch_size, device=x.device) < self.progressive_mask_prob
     move_indices = torch.zeros_like(x, dtype=torch.bool, device=x.device)
     
     for i in range(batch_size):
         m_chance = move_chance[i].item()
-        if self.config.is_vision and is_progressive[i]:
-            num_channels = 3 # RGB
+        
+        if self.config.is_vision:
+            num_channels = 3  # RGB per CIFAR-10
             h = w = int(math.sqrt(seq_len // num_channels))
             m_view = move_indices[i].view(num_channels, h, w)
 
             if is_progressive[i]:
-                # --- BLOCK MASKING (Progressive) ---
-                # Mask entire rows from either the top or the bottom
+                # --- BLOCK/CONTINUOUS MASKING ---
                 num_rows_to_mask = int(h * m_chance)
                 if num_rows_to_mask > 0:
-                    # 50/50 chance to mask from top or bottom
+                    # 50% di probabilità di mascherare dall'alto o dal basso
                     if torch.rand((), device=x.device) < 0.5:
                         m_view[:, h - num_rows_to_mask:, :] = True
                     else:
                         m_view[:, :num_rows_to_mask, :] = True
             else:
                 # --- RANDOM SPATIAL MASKING ---
-                # Mask pixels randomly, but mask the whole pixel (all channels)
+                # Maschera interamente i pixel (tutti e 3 i canali RGB insieme)
                 spatial_mask = torch.rand(h, w, device=x.device) < m_chance
-                m_view[:] = spatial_mask
+                m_view[0, :, :] = spatial_mask
+                m_view[1, :, :] = spatial_mask
+                m_view[2, :, :] = spatial_mask
         else:
-            # --- RANDOM TOKEN MASKING (Text/Non-vision) ---
+            # --- TEXT / NON-VISION MASKING ---
             move_indices[i] = torch.rand(seq_len, device=x.device) < m_chance
 
     if self.diffusion == 'absorbing_state':
-      return torch.where(move_indices, self.mask_index, x)
+        return torch.where(move_indices, self.mask_index, x)
     if self.diffusion == 'uniform':
-      uniform_tensor = torch.randint(
-        0, self.vocab_size, x.shape, device=x.device)
-      return torch.where(move_indices, uniform_tensor, x)
+        uniform_tensor = torch.randint(
+            0, self.vocab_size, x.shape, device=x.device)
+        return torch.where(move_indices, uniform_tensor, x)
     elif self.diffusion == 'uniform_data_marginals':
-      return torch.where(
-        move_indices,
-        self._sample_prior(*x.shape),
-        x)
+        return torch.where(
+            move_indices,
+            self._sample_prior(*x.shape),
+            x)
+        
     raise NotImplementedError(
-      f"Diffusion type {self.diffusion} not implemented.")
+        f"Diffusion type {self.diffusion} not implemented.")
 
   def _forward_pass_diffusion(self, x0, cond=None):
     t = self._sample_t(x0.shape[0])
